@@ -6,15 +6,35 @@ from pygame.locals import (
 )
 import sys
 from config import SCREEN_HEIGHT, SCREEN_WIDTH
-
-pygame.init()
-screen = pygame.display.set_mode([SCREEN_WIDTH, SCREEN_HEIGHT])
+import sprites
 
 
 class Game:
     def __init__(self):
+        # -General setup-
+        pygame.init()
+        self.screen = pygame.display.set_mode([SCREEN_WIDTH, SCREEN_HEIGHT])
         self.clock = pygame.time.Clock()
+
+        # -Groups-
         self.all_sprites = pygame.sprite.Group()
+        self.buttons = pygame.sprite.Group()
+
+        # -Game stuff-
+        self.player_pokemon = sprites.Pokemon("Pikachu", (self.all_sprites, ))
+        self.cp_pokemon = sprites.Pokemon("Bulbasaur", (self.all_sprites, ))
+        self.player_pokemon.rect.center = (150, 600)
+        self.cp_pokemon.rect.center = (800, 150)
+        sprites.Button(
+                (100, 100),
+                (100, 100),
+                (255, 255, 255),
+                "Hello",
+                (self.all_sprites, self.buttons),
+                (255, 0, 0))
+
+    def player_turn(self):
+        pass
 
     def run(self):
         running = True
@@ -27,10 +47,21 @@ class Game:
                 elif event.type == QUIT:
                     running = False
 
-            for sprite in self.all_sprites:
-                screen.blit(sprite.surf, sprite.rect)
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    if event.button == 1:
+                        mouse_pos = pygame.mouse.get_pos()
+                        for button in self.buttons:
+                            if button.rect.collidepoint(mouse_pos):
+                                button.activate()
 
-            screen.fill((0, 0, 0))
+            self.screen.fill((0, 0, 0))
+
+            self.buttons.update()
+
+            for sprite in self.all_sprites:
+                self.screen.blit(sprite.surf, sprite.rect)
+            for button in self.buttons:
+                self.screen.blit(button.text, button.get_text_pos())
 
             pygame.display.flip()
             self.clock.tick(60)
@@ -38,4 +69,8 @@ class Game:
         pygame.quit()
         pygame.display.quit()
         sys.exit()
+
+
+if __name__ == "__main__":
+    Game().run()
 
