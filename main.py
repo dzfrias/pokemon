@@ -15,6 +15,7 @@ class Game:
         pygame.init()
         self.screen = pygame.display.set_mode([SCREEN_WIDTH, SCREEN_HEIGHT])
         self.clock = pygame.time.Clock()
+        pygame.display.set_caption("Pokémon Duels")
 
         # -Groups-
         self.all_sprites = pygame.sprite.Group()
@@ -25,13 +26,12 @@ class Game:
         self.cp_pokemon = sprites.Pokemon("Bulbasaur", (self.all_sprites, ))
         self.player_pokemon.rect.center = (150, 600)
         self.cp_pokemon.rect.center = (800, 150)
-        sprites.Button(
-                (100, 100),
-                (100, 100),
-                (255, 255, 255),
-                "Hello",
-                (self.all_sprites, self.buttons),
-                (255, 0, 0))
+        sprites.Button("Hello", (100, 100),
+                       pos=(100, 100),
+                       color=(255, 255, 255),
+                       groups=(self.all_sprites, self.buttons),
+                       press_col=(255, 0, 0)
+                       )
 
     def player_turn(self):
         pass

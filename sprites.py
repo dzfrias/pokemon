@@ -6,21 +6,25 @@ from pygame.sprite import Sprite, Group
 from helper import Cooldown
 
 pygame.font.init()
+
+# -Constants-
 with open("characters.json") as f:
-    POKEMONS = json.load(f)
+    POKEMON = json.load(f)
 FONT = pygame.font.SysFont("Comic Sans MS", 30)
 
 
 class Button(Sprite):
     def __init__(
             self,
-            pos: tuple,
-            size: tuple,
-            color: tuple,
             text: str,
+            size: tuple,
+            *,
+            pos: tuple,
+            color: tuple,
             groups: tuple,
             press_col: tuple,
-            func=None
+            func=None,
+            args: tuple = None
             ):
         super().__init__(*groups)
         self.surf = Surface(size)
@@ -29,7 +33,8 @@ class Button(Sprite):
         self.text = FONT.render(text, False, (0, 255, 255))
         self.press_col = press_col
         self.func = func
-        self.hit_cooldown = Cooldown(10, auto_update=False)
+        self.args = args
+        self.hit_cooldown = Cooldown(10)
         self.color = color
 
     def activate(self):
@@ -54,7 +59,7 @@ class Button(Sprite):
 class Pokemon(Sprite):
     def __init__(self, name: str, groups: tuple[Group]):
         super().__init__(*groups)
-        pokemon = POKEMONS[name]
+        pokemon = POKEMON[name]
 
         # -Pokemon Stuff-
         self.name = name

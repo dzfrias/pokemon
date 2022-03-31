@@ -1,12 +1,10 @@
 import random
 import json
-
+from collections import namedtuple
 
 # Reads in the dictionaries from the json files
-with open('moves_dictionary.json') as json_file:
+with open("moves.json") as json_file:
     MOVES_DICTIONARY = json.load(json_file)
-with open('characters.json') as json_file:
-    CHARACTERS = json.load(json_file)
 
 
 # Class to read in information from the move dictionary
@@ -17,6 +15,9 @@ class Move:
         self.type = MOVES_DICTIONARY[self.name]["type"]
         self.super_effective = MOVES_DICTIONARY[self.name]["super effective against"]
         self.not_effective = MOVES_DICTIONARY[self.name]["not very effective against"]
+
+
+Move = namedtuple("Move", ["move_name"])
 
 
 # Attack method

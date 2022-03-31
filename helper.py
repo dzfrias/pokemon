@@ -1,18 +1,16 @@
-from functools import total_ordering
+from dataclasses import dataclass, field
+from typing import Callable
 
 
-@total_ordering
+@dataclass(order=True)
 class Cooldown:
-    cooldowns = []
+    reset_val: int
+    auto_reset: bool = field(kw_only=True, compare=False, default=False)
+    func: Callable = field(kw_only=True, compare=False, default=None)
+    args: tuple = field(kw_only=True, compare=False, default=())
 
-    def __init__(self, reset_val: int, *, auto_reset=False, zero_start=True,
-                 func=None, auto_update=True):
-        if auto_update:
-            Cooldown.cooldowns.append(self)
-        self.value = reset_val if not zero_start else 0
-        self.auto_reset = auto_reset
-        self.reset_val = reset_val
-        self.func = func
+    def __post_init__(self):
+        self.value = 0
 
     def reset(self, reset_val=None, *, call_func=True):
         if reset_val is None:
@@ -20,7 +18,7 @@ class Cooldown:
         else:
             self.value = reset_val
         if self.func is not None and call_func:
-            self.func()
+            self.func(*self.args)
 
     def update(self):
         if self.value:
@@ -34,9 +32,6 @@ class Cooldown:
     def __bool__(self):
         return bool(self.value)
 
-    def __eq__(self, other):
-        return self.value == other
-
-    def __lt__(self, other):
-        return self.value < other
+    def __repr__(self):
+        return f"{self.__class__.__name__}({self.value}, reset_val={self.reset_val})"
 
