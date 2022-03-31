@@ -1,0 +1,8 @@
+import json
+    
+# Data to be written
+
+dictionary
+
+with open("file name.json", "w") as outfile:
+    json.dump(dictionary name, outfile)
