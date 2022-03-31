@@ -86,22 +86,22 @@ def attack(speed, move, opponent_type, level, attack, defense, defender_hp):
         if len(super_effective) > 1:
             for i in super_effective:
                 if i == opponent_type:
-                    type*2
+                    type *= 2
                     print("Super effective...")
         else:
             if opponent_type in super_effective:
-                type*2
+                type *= 2
                 print("Super effective...")
     # Not very effective
     if len(not_effective) != 0:
         if len(not_effective) > 1:
             for i in not_effective:
                 if i == opponent_type:
-                    type/2
+                    type /= 2
                     print("Not very effective...")
         else:
             if opponent_type in super_effective:
-                type/2
+                type /= 2
                 print("Not very effective...")
     # Calculates the modifier
     modifier = critical * rand_modifier * type
@@ -112,8 +112,10 @@ def attack(speed, move, opponent_type, level, attack, defense, defender_hp):
     defender_hp -= damage
     print(f"defender hp: {defender_hp}")
 
+
 bite = Move("Bite")
-move_info = {"name": bite.name, "power": bite.power, "type": bite.type, "super_effective": bite.super_effective, "not_effective": bite.not_effective}
-attack(67, move_info, "Ghost", 50, 65, 60, 60)
+move_info = {"name": bite.name, "power": bite.power, "type": bite.type, "super_effective": bite.super_effective,
+             "not_effective": bite.not_effective}
+attack(60, move_info, "Ghost", 50, 65, 60, 60)
 
 
