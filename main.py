@@ -24,19 +24,25 @@ class Game:
         self.text = pygame.sprite.Group()
 
         # -Game stuff-
-        self.player_pokemon = sprites.Pokemon("Squirtle", (self.all_sprites, ))
-        self.cp_pokemon = sprites.Pokemon("Gengar", (self.all_sprites, ))
+        self.player_pokemon = sprites.Pokemon("Gengar", (self.all_sprites, ))
+        self.cp_pokemon = sprites.Pokemon("Squirtle", (self.all_sprites, ))
         self.player_pokemon.surf = pygame.image.load(f"images/{self.player_pokemon.name.lower()}.png").convert_alpha()
         self.player_pokemon.surf = pygame.transform.scale(self.player_pokemon.surf, [150, 150])
         self.player_pokemon.rect.center = (150, 500)
         self.cp_pokemon.surf = pygame.image.load(f"images/{self.cp_pokemon.name.lower()}.png").convert_alpha()
         self.cp_pokemon.surf = pygame.transform.scale(self.cp_pokemon.surf, [150, 150])
         self.cp_pokemon.rect.center = (800, 375)
-        self.p_turn = False
         self.messages = []
         self.current_message = None
         self.background = pygame.image.load("images/background.png").convert()
         self.background = pygame.transform.scale(self.background, [1000, 750])
+
+        if self.player_pokemon.speed > self.cp_pokemon.speed:
+            self.p_turn = True
+            self.messages.append("Player goes first!")
+        else:
+            self.p_turn = False
+            self.messages.append("Computer goes first!")
 
     def player_turn(self):
         # Get the appropriate button spread depending on the amount of moves
@@ -63,7 +69,7 @@ class Game:
                            func=self.player_pokemon.use_move,
                            args=(move, self.cp_pokemon)
                            )
-            self.p_turn = True
+            self.p_turn = False
 
     def run(self):
         running = True
@@ -88,15 +94,19 @@ class Game:
                                 for result in results:
                                     self.messages.append(result)
 
-            if not self.p_turn:
-                self.player_turn()
             if self.current_message is None or self.current_message.seen:
                 try:
                     self.current_message = sprites.Message(self.messages.pop(0), (500, 600), (self.all_sprites, self.text))
                 except IndexError:
                     pass
-            pressed = pygame.key.get_pressed()
+            if self.p_turn and not self.move_buttons and self.current_message.seen:
+                self.player_turn()
+            elif not self.move_buttons and self.current_message.seen:
+                # Computer turn
+                self.messages = self.cp_pokemon.use_move(self.cp_pokemon.moves[-1], self.player_pokemon)
+                self.p_turn = True
 
+            pressed = pygame.key.get_pressed()
             self.buttons.update()
             self.text.update(pressed)
 

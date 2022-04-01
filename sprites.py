@@ -156,7 +156,7 @@ class Pokemon(Sprite):
         critical_calc = random.randint(0, 511)
         if critical_calc < self.speed:
             critical = 2
-            print("A critical hit!")
+            messages.append("A critical hit!")
         # Code to calculate the random modifier of the attack
         rand_modifier = random.randint(85, 100) / 100
         # Code to calculate the effectiveness of the attack
@@ -182,6 +182,11 @@ class Pokemon(Sprite):
         messages.insert(1, f"Damage dealt: {int(damage)}")
         opponent.hp -= damage
         return messages
+
+
+# class CPPokemon(Pokemon):
+#     def attack(self, pokemon):
+#         self
 
 
 # Class to read in information from the move dictionary
