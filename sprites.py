@@ -67,7 +67,7 @@ class Button(Sprite):
             self.hit_cooldown.reset()
             try:
                 # Calls the associated function if it is set
-                self.func()
+                self.func(*self.args)
             except TypeError:
                 pass
 
@@ -116,9 +116,9 @@ class Move:
         # Code to calculate the effectiveness of the attack
 
         # Super effective
-        for index, effective in enumerate((self.super_effective, self.not_effective), 1):
+        for index, effective in enumerate((self.super_effective, self.not_effective)):
             if opponent.type in effective:
-                if index == 1:
+                if index == 0:
                     self.type *= 2
                     print("Super effective...")
                 else:

@@ -50,7 +50,9 @@ class Game:
                            text_col=(0, 0, 0),
                            groups=(self.all_sprites, self.buttons),
                            float_col=(246, 213, 109),
-                           press_col=(215, 0, 64)
+                           press_col=(215, 0, 64),
+                           func=move.use_move,
+                           args=(self.cp_pokemon,)
                            )
             self.p_turn = True
 
