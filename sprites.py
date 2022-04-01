@@ -89,8 +89,8 @@ class Button(Sprite):
 
 # Class to read in information from the move dictionary
 class Move:
-    def __init__(self):
-        self.name = "Rock Slide"
+    def __init__(self, move_name):
+        self.name = move_name
         stats = MOVES_DICTIONARY[self.name]
         self.power = stats["power"]
         self.move_type = stats["type"]
@@ -104,7 +104,7 @@ class Move:
         self.damage = 0
 
     # Attack method
-    def use_move(self, opponent_type, defense, defender_hp):
+    def use_move(self, opponent):
         # Code to decide whether the attack is a critical hit
         critical = 1
         critical_calc = random.randint(0, 511)
@@ -117,7 +117,7 @@ class Move:
 
         # Super effective
         for index, effective in enumerate((self.super_effective, self.not_effective), 1):
-            if opponent_type in effective:
+            if opponent.type in effective:
                 if index == 1:
                     self.type *= 2
                     print("Super effective...")
@@ -128,11 +128,11 @@ class Move:
         # Calculates the modifier
         self.modifier = critical * rand_modifier * self.type
         # Calculates damage (rounding to nearest integer)
-        self.damage = round(((((((2 * self.level) / 5) + 2) * self.power * (self.attack / defense)) / 50) * self.modifier), 0)
+        self.damage = round(((((((2 * self.level) / 5) + 2) * self.power * (self.attack / opponent.defense)) / 50) * self.modifier), 0)
         print(f"Pokemon used {self.name}!")
         print(f"Damage dealt: {int(self.damage)}")
-        defender_hp -= self.damage
-        print(f"Defender hp: {int(defender_hp)}")
+        opponent.hp -= self.damage
+        print(f"Defender hp: {int(opponent.hp)}")
 
     def __repr__(self):
         return str(self.__dict__)
@@ -168,5 +168,7 @@ class Pokemon(Sprite):
         return f"{self.__class__.__name__}({self.name}, {self.hp})"
 
 
-bite_test = Move()
-bite_test.use_move("Ghost", 60, 60)
+group = pygame.sprite.Group()
+defender = Pokemon("Gengar", (group, ))
+bite_test = Move("Rock Slide")
+bite_test.use_move(defender)
