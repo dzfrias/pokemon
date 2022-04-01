@@ -24,7 +24,11 @@ class Game:
         # -Game stuff-
         self.player_pokemon = sprites.Pokemon("Squirtle", (self.all_sprites, ))
         self.cp_pokemon = sprites.Pokemon("Gengar", (self.all_sprites, ))
+        self.player_pokemon.surf = pygame.image.load(f"images/{self.player_pokemon.name.lower()}.png").convert_alpha()
+        self.player_pokemon.surf = pygame.transform.scale(self.player_pokemon.surf, [150, 150])
         self.player_pokemon.rect.center = (150, 500)
+        self.cp_pokemon.surf = pygame.image.load(f"images/{self.cp_pokemon.name.lower()}.png").convert_alpha()
+        self.cp_pokemon.surf = pygame.transform.scale(self.cp_pokemon.surf, [150, 150])
         self.cp_pokemon.rect.center = (800, 150)
         self.p_turn = False
 
