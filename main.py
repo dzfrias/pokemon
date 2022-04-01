@@ -29,7 +29,7 @@ class Game:
         self.player_pokemon.rect.center = (150, 500)
         self.cp_pokemon.surf = pygame.image.load(f"images/{self.cp_pokemon.name.lower()}.png").convert_alpha()
         self.cp_pokemon.surf = pygame.transform.scale(self.cp_pokemon.surf, [150, 150])
-        self.cp_pokemon.rect.center = (800, 150)
+        self.cp_pokemon.rect.center = (800, 375)
         self.p_turn = False
 
     def player_turn(self):
@@ -44,7 +44,6 @@ class Game:
         else:
             spread = 300
             start = 200
-
         for index, move in enumerate(self.player_pokemon.moves):
             # Spreads the buttons out evenly across the screen
             pos = (index * spread + start, 650)
