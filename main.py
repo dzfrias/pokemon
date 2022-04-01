@@ -24,17 +24,21 @@ class Game:
         # -Game stuff-
         self.player_pokemon = sprites.Pokemon("Pikachu", (self.all_sprites, ))
         self.cp_pokemon = sprites.Pokemon("Bulbasaur", (self.all_sprites, ))
-        self.player_pokemon.rect.center = (150, 600)
+        self.player_pokemon.rect.center = (150, 500)
         self.cp_pokemon.rect.center = (800, 150)
-        sprites.Button("Hello", (100, 100),
-                       pos=(100, 100),
-                       color=(255, 255, 255),
-                       groups=(self.all_sprites, self.buttons),
-                       press_col=(255, 0, 0)
-                       )
+        self.p_turn = False
 
     def player_turn(self):
-        pass
+        for index, move in enumerate(self.player_pokemon.moves):
+            pos = (index * 300 + 200, 700)
+            sprites.Button(move.name,
+                           pos=pos,
+                           color=(255, 255, 255),
+                           text_col=(0, 0, 0),
+                           groups=(self.all_sprites, self.buttons),
+                           press_col=(255, 0, 0)
+                           )
+            self.p_turn = True
 
     def run(self):
         running = True
@@ -55,6 +59,9 @@ class Game:
                                 button.activate()
 
             self.screen.fill((0, 0, 0))
+
+            if not self.p_turn:
+                self.player_turn()
 
             self.buttons.update()
 
