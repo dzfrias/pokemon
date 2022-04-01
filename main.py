@@ -26,8 +26,12 @@ class Game:
         # -Game stuff-
         self.player_pokemon = sprites.Pokemon("Squirtle", (self.all_sprites, ))
         self.cp_pokemon = sprites.Pokemon("Gengar", (self.all_sprites, ))
+        self.player_pokemon.surf = pygame.image.load(f"images/{self.player_pokemon.name.lower()}.png").convert_alpha()
+        self.player_pokemon.surf = pygame.transform.scale(self.player_pokemon.surf, [150, 150])
         self.player_pokemon.rect.center = (150, 500)
-        self.cp_pokemon.rect.center = (800, 150)
+        self.cp_pokemon.surf = pygame.image.load(f"images/{self.cp_pokemon.name.lower()}.png").convert_alpha()
+        self.cp_pokemon.surf = pygame.transform.scale(self.cp_pokemon.surf, [150, 150])
+        self.cp_pokemon.rect.center = (800, 375)
         self.p_turn = False
         self.messages = []
         self.current_message = None
@@ -44,7 +48,6 @@ class Game:
         else:
             spread = 300
             start = 200
-
         for index, move in enumerate(self.player_pokemon.moves):
             # Spreads the buttons out evenly across the screen
             pos = (index * spread + start, 650)
@@ -83,7 +86,9 @@ class Game:
                                 for result in results:
                                     self.messages.append(result)
 
-            self.screen.fill((0, 0, 0))
+            background = pygame.image.load("images/background.png")
+            background = pygame.transform.scale(background, [1000, 750])
+            self.screen.blit(background, [0, 0])
 
             if not self.p_turn:
                 self.player_turn()
