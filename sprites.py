@@ -1,6 +1,5 @@
 import json
 import math
-
 import pygame
 from pygame import Surface
 from pygame.image import load
@@ -74,11 +73,12 @@ class Button(Sprite):
             self.hit_cooldown.reset()
             try:
                 # Calls the associated function if it is set
-                self.func(*self.args)
+                result = self.func(*self.args)
             except TypeError:
-                pass
+                result = None
             for button in self.groups()[-1]:
                 button.kill()
+            return result
 
     def update(self):
         self.hit_cooldown.update()
@@ -105,12 +105,15 @@ class Message(Sprite):
         self.surf = FONT.render(text, True, "White")
         self.rect = self.surf.get_rect(center=pos)
         self.text = text
+        self.timer = 60
 
     def update(self, pressed):
         enter = pressed[K_RETURN]
-        if enter:
+        if enter and not self.timer:
             self.kill()
             self.seen = True
+        if self.timer > 0:
+            self.timer -= 1
 
     def __repr__(self):
         return f"{self.__class__.__name__}({self.text}, pos={self.rect.center})"
@@ -144,6 +147,7 @@ class Pokemon(Sprite):
 
     # Attack Method
     def use_move(self, move, opponent):
+        messages = []
         # Code to decide whether the attack is a critical hit
         critical = 1
         type_modifier = 1
@@ -162,10 +166,10 @@ class Pokemon(Sprite):
             for i in effective:
                 if i in opponent.type and index == 0:
                     type_modifier *= 2
-                    print("Super effective...")
+                    messages.append("Super effective!")
                 elif i in opponent.type and index == 1:
                     type_modifier /= 2
-                    print("Not very effective...")
+                    messages.append("Not very effective...")
 
         # Calculates the modifier
         modifier = critical * rand_modifier * type_modifier
@@ -174,10 +178,10 @@ class Pokemon(Sprite):
             ((((((2 * self.level()) / 5) + 2) * move.power * (
                         self.attack / opponent.defense)) / 50) * modifier),
             0)
-        print(f"{self.name} used {move.name}!")
-        print(f"Damage dealt: {int(damage)}")
+        messages.insert(0, f"{self.name} used {move.name}!")
+        messages.insert(1, f"Damage dealt: {int(damage)}")
         opponent.hp -= damage
-        print(f"Defender hp: {int(opponent.hp)}")
+        return messages
 
 
 # Class to read in information from the move dictionary

@@ -29,6 +29,8 @@ class Game:
         self.player_pokemon.rect.center = (150, 500)
         self.cp_pokemon.rect.center = (800, 150)
         self.p_turn = False
+        self.messages = []
+        self.current_message = None
 
     def player_turn(self):
         # Get the appropriate button spread depending on the amount of moves
@@ -77,13 +79,19 @@ class Game:
                             if button.rect.collidepoint(mouse_pos) or button.touch_box.collidepoint(mouse_pos):
                                 # Checks for collision with the point of the
                                 # mouse position
-                                button.activate()
+                                results = button.activate()
+                                for result in results:
+                                    self.messages.append(result)
 
             self.screen.fill((0, 0, 0))
 
             if not self.p_turn:
                 self.player_turn()
-                sprites.Message("Hello", (100, 100), (self.all_sprites, self.text))
+            if self.current_message is None or self.current_message.seen:
+                try:
+                    self.current_message = sprites.Message(self.messages.pop(0), (500, 600), (self.all_sprites, self.text))
+                except IndexError:
+                    pass
             pressed = pygame.key.get_pressed()
 
             self.buttons.update()
