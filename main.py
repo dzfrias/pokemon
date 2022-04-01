@@ -29,7 +29,6 @@ class Game:
         self.p_turn = False
 
     def player_turn(self):
-
         # Get the appropriate button spread depending on the amount of moves
         move_len = len(self.player_pokemon.moves)
         if move_len == 5:
@@ -44,19 +43,22 @@ class Game:
 
         for index, move in enumerate(self.player_pokemon.moves):
             # Spreads the buttons out evenly across the screen
-            pos = (index * spread + start, 700)
+            pos = (index * spread + start, 650)
             sprites.Button(move.name,
                            pos=pos,
                            color=(255, 255, 255),
                            text_col=(0, 0, 0),
                            groups=(self.all_sprites, self.buttons),
-                           press_col=(255, 0, 0)
+                           float_col=(246, 213, 109),
+                           press_col=(215, 0, 64)
                            )
             self.p_turn = True
 
     def run(self):
         running = True
         while running:
+            mouse_pos = pygame.mouse.get_pos()
+
             for event in pygame.event.get():
                 if event.type == KEYDOWN:
                     if event.key == K_ESCAPE:
@@ -67,9 +69,8 @@ class Game:
 
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:
-                        mouse_pos = pygame.mouse.get_pos()
                         for button in self.buttons:
-                            if button.rect.collidepoint(mouse_pos):
+                            if button.rect.collidepoint(mouse_pos) or button.touch_box.collidepoint(mouse_pos):
                                 # Checks for collision with the point of the
                                 # mouse position
                                 button.activate()
@@ -85,6 +86,8 @@ class Game:
                 self.screen.blit(sprite.surf, sprite.rect)
             # Puts button text on the screen
             for button in self.buttons:
+                collide = button.touch_box.collidepoint(mouse_pos)
+                button.handle_float(collide)
                 self.screen.blit(button.text, button.get_text_pos())
 
             pygame.display.flip()

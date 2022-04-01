@@ -28,6 +28,7 @@ class Button(Sprite):
             groups: tuple,
             press_col: tuple,
             text_col: tuple,
+            float_col: tuple,
             func=None,
             args: tuple = None
             ):
@@ -44,6 +45,19 @@ class Button(Sprite):
         # Cooldown for getting hit and flashing press_col
         self.hit_cooldown = Cooldown(10)
         self.color = color
+        self.touch_box = self.rect.copy()
+        self.start_y = self.rect.centery
+        self.floating = False
+        self.float_col = float_col
+
+    def handle_float(self, collide):
+        if collide and not self.floating:
+            self.rect.centery -= 20
+            self.floating = True
+            self.surf.fill(self.float_col)
+        elif not collide:
+            self.rect.centery = self.start_y
+            self.floating = False
 
     def activate(self):
         if not self.hit_cooldown:
@@ -59,8 +73,10 @@ class Button(Sprite):
     def update(self):
         self.hit_cooldown.update()
         # Checks if cooldown is not active
-        if not self.hit_cooldown:
+        if not self.hit_cooldown and not self.floating:
             self.surf.fill(self.color)
+        elif not self.hit_cooldown and self.floating:
+            self.surf.fill(self.float_col)
 
     def get_text_pos(self):
         size_x, size_y = self.text.get_size()
