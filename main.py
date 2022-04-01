@@ -77,7 +77,9 @@ class Game:
                                 # mouse position
                                 button.activate()
 
-            self.screen.fill((0, 0, 0))
+            background = pygame.image.load("images/background.png")
+            background = pygame.transform.scale(background, [1000, 750])
+            self.screen.blit(background, [0, 0])
 
             if not self.p_turn:
                 self.player_turn()
