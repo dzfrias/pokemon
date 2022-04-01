@@ -1,4 +1,6 @@
 import json
+import math
+
 import pygame
 from pygame import Surface
 from pygame.image import load
@@ -86,57 +88,8 @@ class Button(Sprite):
         center[1] -= size_y / 2
         return center
 
-
-# Class to read in information from the move dictionary
-class Move:
-    def __init__(self, move_name):
-        self.name = move_name
-        stats = MOVES_DICTIONARY[self.name]
-        self.power = stats["power"]
-        self.move_type = stats["type"]
-        self.super_effective = stats["super effective against"]
-        self.not_effective = stats["not very effective against"]
-        self.type = 1
-        self.level = 50
-        self.speed = 60
-        self.attack = 65
-        self.modifier = 1
-        self.damage = 0
-
-    # Attack method
-    def use_move(self, opponent):
-        # Code to decide whether the attack is a critical hit
-        critical = 1
-        critical_calc = random.randint(0, 511)
-        if critical_calc < self.speed:
-            critical = 2
-            print("A critical hit!")
-        # Code to calculate the random modifier of the attack
-        rand_modifier = random.randint(85, 100) / 100
-        # Code to calculate the effectiveness of the attack
-
-        # Super effective
-        for index, effective in enumerate((self.super_effective, self.not_effective)):
-            if opponent.type in effective:
-                if index == 0:
-                    self.type *= 2
-                    print("Super effective...")
-                else:
-                    self.type /= 2
-                    print("Not very effective...")
-
-        # Calculates the modifier
-        self.modifier = critical * rand_modifier * self.type
-        # Calculates damage (rounding to nearest integer)
-        self.damage = round(((((((2 * self.level) / 5) + 2) * self.power * (self.attack / opponent.defense)) / 50) * self.modifier), 0)
-        print(f"Pokemon used {self.name}!")
-        print(f"Damage dealt: {int(self.damage)}")
-        opponent.hp -= self.damage
-        print(f"Defender hp: {int(opponent.hp)}")
-
-    def __repr__(self):
-        return str(self.__dict__)
-
+        def __repr__(self):
+            return str(self.__dict__)
 
 class Pokemon(Sprite):
     def __init__(self, name: str, groups: tuple[Group]):
@@ -153,7 +106,6 @@ class Pokemon(Sprite):
         self.defense = pokemon["Defense"]
         self.speed = pokemon["Speed"]
         self.xp = pokemon["Experience"]
-        self.level = 1
 
         # -Pygame Stuff-
         # self.surf = load(pokemon["Image"])
@@ -161,14 +113,59 @@ class Pokemon(Sprite):
         self.rect = self.surf.get_rect()
         self.surf.fill((255, 255, 255))
 
+    # Method to return the level of the pokemon
+    def level(self):
+        return math.floor(self.xp**(1/3))
+
+    # Attack Method
+    def use_move(self, move, opponent):
+        # Code to decide whether the attack is a critical hit
+        critical = 1
+        type_modifier = 1
+        modifier = 1
+        damage = 0
+        critical_calc = random.randint(0, 511)
+        if critical_calc < self.speed:
+            critical = 2
+            print("A critical hit!")
+        # Code to calculate the random modifier of the attack
+        rand_modifier = random.randint(85, 100) / 100
+        # Code to calculate the effectiveness of the attack
+
+        # Super effective
+        for index, effective in enumerate((move.super_effective, move.not_effective)):
+            for i in effective:
+                if i in opponent.type and index == 0:
+                    type_modifier *= 2
+                    print("Super effective...")
+                elif i in opponent.type and index == 1:
+                    type_modifier /= 2
+                    print("Not very effective...")
+
+        # Calculates the modifier
+        modifier = critical * rand_modifier * type_modifier
+        # Calculates damage (rounding to nearest integer)
+        damage = round(
+            ((((((2 * self.level()) / 5) + 2) * move.power * (
+                        self.attack / opponent.defense)) / 50) * modifier),
+            0)
+        print(f"{self.name} used {move.name}!")
+        print(f"Damage dealt: {int(damage)}")
+        opponent.hp -= damage
+        print(f"Defender hp: {int(opponent.hp)}")
+
+
+# Class to read in information from the move dictionary
+class Move:
+    def __init__(self, move_name):
+        self.name = move_name
+        stats = MOVES_DICTIONARY[self.name]
+        self.power = stats["power"]
+        self.move_type = stats["type"]
+        self.super_effective = stats["super effective against"]
+        self.not_effective = stats["not very effective against"]
+
     def update(self):
         pass
 
-    def __repr__(self):
-        return f"{self.__class__.__name__}({self.name}, {self.hp})"
 
-
-group = pygame.sprite.Group()
-defender = Pokemon("Gengar", (group, ))
-bite_test = Move("Rock Slide")
-bite_test.use_move(defender)

@@ -22,8 +22,8 @@ class Game:
         self.buttons = pygame.sprite.Group()
 
         # -Game stuff-
-        self.player_pokemon = sprites.Pokemon("Beedrill", (self.all_sprites, ))
-        self.cp_pokemon = sprites.Pokemon("Bulbasaur", (self.all_sprites, ))
+        self.player_pokemon = sprites.Pokemon("Squirtle", (self.all_sprites, ))
+        self.cp_pokemon = sprites.Pokemon("Gengar", (self.all_sprites, ))
         self.player_pokemon.rect.center = (150, 500)
         self.cp_pokemon.rect.center = (800, 150)
         self.p_turn = False
@@ -51,8 +51,8 @@ class Game:
                            groups=(self.all_sprites, self.buttons),
                            float_col=(246, 213, 109),
                            press_col=(215, 0, 64),
-                           func=move.use_move,
-                           args=(self.cp_pokemon,)
+                           func=self.player_pokemon.use_move,
+                           args=(move, self.cp_pokemon)
                            )
             self.p_turn = True
 
