@@ -22,15 +22,29 @@ class Game:
         self.buttons = pygame.sprite.Group()
 
         # -Game stuff-
-        self.player_pokemon = sprites.Pokemon("Pikachu", (self.all_sprites, ))
+        self.player_pokemon = sprites.Pokemon("Beedrill", (self.all_sprites, ))
         self.cp_pokemon = sprites.Pokemon("Bulbasaur", (self.all_sprites, ))
         self.player_pokemon.rect.center = (150, 500)
         self.cp_pokemon.rect.center = (800, 150)
         self.p_turn = False
 
     def player_turn(self):
+
+        # Get the appropriate button spread depending on the amount of moves
+        move_len = len(self.player_pokemon.moves)
+        if move_len == 5:
+            spread = 200
+            start = 100
+        elif move_len == 4:
+            spread = 200
+            start = 150
+        else:
+            spread = 300
+            start = 200
+
         for index, move in enumerate(self.player_pokemon.moves):
-            pos = (index * 300 + 200, 700)
+            # Spreads the buttons out evenly across the screen
+            pos = (index * spread + start, 700)
             sprites.Button(move.name,
                            pos=pos,
                            color=(255, 255, 255),
@@ -56,6 +70,8 @@ class Game:
                         mouse_pos = pygame.mouse.get_pos()
                         for button in self.buttons:
                             if button.rect.collidepoint(mouse_pos):
+                                # Checks for collision with the point of the
+                                # mouse position
                                 button.activate()
 
             self.screen.fill((0, 0, 0))
@@ -67,6 +83,7 @@ class Game:
 
             for sprite in self.all_sprites:
                 self.screen.blit(sprite.surf, sprite.rect)
+            # Puts button text on the screen
             for button in self.buttons:
                 self.screen.blit(button.text, button.get_text_pos())
 

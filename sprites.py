@@ -32,24 +32,33 @@ class Button(Sprite):
             args: tuple = None
             ):
         super().__init__(*groups)
+        # Creates surface with text on it
         self.text = FONT.render(text, False, text_col)
+        # Sets the surface of the actual button to the size of the text surface
         self.surf = Surface(self.text.get_size())
         self.rect = self.surf.get_rect(center=pos)
         self.surf.fill(color)
         self.press_col = press_col
         self.func = func
         self.args = args
+        # Cooldown for getting hit and flashing press_col
         self.hit_cooldown = Cooldown(10)
         self.color = color
 
     def activate(self):
-        self.surf.fill(self.press_col)
-        self.hit_cooldown.reset()
-        if self.func is not None:
-            self.func()
+        if not self.hit_cooldown:
+            self.surf.fill(self.press_col)
+            # Starts the cooldown
+            self.hit_cooldown.reset()
+            try:
+                # Calls the associated function if it is set
+                self.func()
+            except TypeError:
+                pass
 
     def update(self):
         self.hit_cooldown.update()
+        # Checks if cooldown is not active
         if not self.hit_cooldown:
             self.surf.fill(self.color)
 
@@ -84,6 +93,7 @@ class Pokemon(Sprite):
         self.name = name
         self.type = pokemon["Type"]
         self.hp = pokemon["HP"]
+        # Creates a Move instance for each name in the pokemon["Moves"] entry
         self.moves = [Move(move_name) for move_name in pokemon["Moves"]]
         self.attack = pokemon["Attack"]
         self.defense = pokemon["Defense"]
