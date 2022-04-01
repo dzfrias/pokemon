@@ -20,6 +20,8 @@ class Game:
         # -Groups-
         self.all_sprites = pygame.sprite.Group()
         self.buttons = pygame.sprite.Group()
+        self.move_buttons = pygame.sprite.Group()
+        self.text = pygame.sprite.Group()
 
         # -Game stuff-
         self.player_pokemon = sprites.Pokemon("Beedrill", (self.all_sprites, ))
@@ -48,7 +50,7 @@ class Game:
                            pos=pos,
                            color=(255, 255, 255),
                            text_col=(0, 0, 0),
-                           groups=(self.all_sprites, self.buttons),
+                           groups=(self.all_sprites, self.buttons, self.move_buttons),
                            float_col=(246, 213, 109),
                            press_col=(215, 0, 64),
                            func=move.use_move,
@@ -81,8 +83,11 @@ class Game:
 
             if not self.p_turn:
                 self.player_turn()
+                sprites.Message("Hello", (100, 100), (self.all_sprites, self.text))
+            pressed = pygame.key.get_pressed()
 
             self.buttons.update()
+            self.text.update(pressed)
 
             for sprite in self.all_sprites:
                 self.screen.blit(sprite.surf, sprite.rect)

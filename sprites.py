@@ -4,6 +4,7 @@ from pygame import Surface
 from pygame.image import load
 from pygame.sprite import Sprite, Group
 from helper import Cooldown
+from pygame.locals import K_RETURN
 import random
 
 pygame.font.init()
@@ -34,6 +35,8 @@ class Button(Sprite):
             args: tuple = None
             ):
         super().__init__(*groups)
+
+        # -Pygame Stuff-
         # Creates surface with text on it
         self.text = FONT.render(text, False, text_col)
         # Sets the surface of the actual button to the size of the text surface
@@ -41,15 +44,17 @@ class Button(Sprite):
         self.rect = self.surf.get_rect(center=pos)
         self.surf.fill(color)
         self.press_col = press_col
-        self.func = func
-        self.args = args
-        # Cooldown for getting hit and flashing press_col
-        self.hit_cooldown = Cooldown(10)
-        self.color = color
         self.touch_box = self.rect.copy()
         self.start_y = self.rect.centery
         self.floating = False
         self.float_col = float_col
+        self.color = color
+
+        # -Button Stuff-
+        self.func = func
+        self.args = args
+        # Cooldown for getting hit and flashing press_col
+        self.hit_cooldown = Cooldown(10)
 
     def handle_float(self, collide):
         if collide and not self.floating:
@@ -70,6 +75,8 @@ class Button(Sprite):
                 self.func(*self.args)
             except TypeError:
                 pass
+            for button in self.groups()[-1]:
+                button.kill()
 
     def update(self):
         self.hit_cooldown.update()
@@ -138,6 +145,24 @@ class Move:
         return str(self.__dict__)
 
 
+class Message(Sprite):
+    def __init__(self, text, pos, groups):
+        super().__init__(*groups)
+        self.seen = False
+        self.surf = FONT.render(text, True, "White")
+        self.rect = self.surf.get_rect(center=pos)
+        self.text = text
+
+    def update(self, pressed):
+        enter = pressed[K_RETURN]
+        if enter:
+            self.kill()
+            self.seen = True
+
+    def __repr__(self):
+        return f"{self.__class__.__name__}({self.text}, pos={self.rect.center})"
+
+
 class Pokemon(Sprite):
     def __init__(self, name: str, groups: tuple[Group]):
         super().__init__(*groups)
@@ -167,8 +192,3 @@ class Pokemon(Sprite):
     def __repr__(self):
         return f"{self.__class__.__name__}({self.name}, {self.hp})"
 
-
-group = pygame.sprite.Group()
-defender = Pokemon("Gengar", (group, ))
-bite_test = Move("Rock Slide")
-bite_test.use_move(defender)
