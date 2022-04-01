@@ -35,6 +35,8 @@ class Game:
         self.p_turn = False
         self.messages = []
         self.current_message = None
+        self.background = pygame.image.load("images/background.png").convert()
+        self.background = pygame.transform.scale(self.background, [1000, 750])
 
     def player_turn(self):
         # Get the appropriate button spread depending on the amount of moves
@@ -86,10 +88,6 @@ class Game:
                                 for result in results:
                                     self.messages.append(result)
 
-            background = pygame.image.load("images/background.png")
-            background = pygame.transform.scale(background, [1000, 750])
-            self.screen.blit(background, [0, 0])
-
             if not self.p_turn:
                 self.player_turn()
             if self.current_message is None or self.current_message.seen:
@@ -102,6 +100,7 @@ class Game:
             self.buttons.update()
             self.text.update(pressed)
 
+            self.screen.blit(self.background, (0, 0))
             for sprite in self.all_sprites:
                 self.screen.blit(sprite.surf, sprite.rect)
             # Puts button text on the screen
