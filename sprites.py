@@ -4,6 +4,7 @@ from pygame import Surface
 from pygame.image import load
 from pygame.sprite import Sprite, Group
 from helper import Cooldown
+import random
 
 pygame.font.init()
 
@@ -88,13 +89,50 @@ class Button(Sprite):
 
 # Class to read in information from the move dictionary
 class Move:
-    def __init__(self, move_name):
-        self.name = move_name
+    def __init__(self):
+        self.name = "Rock Slide"
         stats = MOVES_DICTIONARY[self.name]
         self.power = stats["power"]
-        self.type = stats["type"]
+        self.move_type = stats["type"]
         self.super_effective = stats["super effective against"]
         self.not_effective = stats["not very effective against"]
+        self.type = 1
+        self.level = 50
+        self.speed = 60
+        self.attack = 65
+        self.modifier = 1
+        self.damage = 0
+
+    # Attack method
+    def use_move(self, opponent_type, defense, defender_hp):
+        # Code to decide whether the attack is a critical hit
+        critical = 1
+        critical_calc = random.randint(0, 511)
+        if critical_calc < self.speed:
+            critical = 2
+            print("A critical hit!")
+        # Code to calculate the random modifier of the attack
+        rand_modifier = random.randint(85, 100) / 100
+        # Code to calculate the effectiveness of the attack
+
+        # Super effective
+        for index, effective in enumerate((self.super_effective, self.not_effective), 1):
+            if opponent_type in effective:
+                if index == 1:
+                    self.type *= 2
+                    print("Super effective...")
+                else:
+                    self.type /= 2
+                    print("Not very effective...")
+
+        # Calculates the modifier
+        self.modifier = critical * rand_modifier * self.type
+        # Calculates damage (rounding to nearest integer)
+        self.damage = round(((((((2 * self.level) / 5) + 2) * self.power * (self.attack / defense)) / 50) * self.modifier), 0)
+        print(f"Pokemon used {self.name}!")
+        print(f"Damage dealt: {int(self.damage)}")
+        defender_hp -= self.damage
+        print(f"Defender hp: {int(defender_hp)}")
 
     def __repr__(self):
         return str(self.__dict__)
@@ -129,3 +167,6 @@ class Pokemon(Sprite):
     def __repr__(self):
         return f"{self.__class__.__name__}({self.name}, {self.hp})"
 
+
+bite_test = Move()
+bite_test.use_move("Ghost", 60, 60)
