@@ -151,16 +151,13 @@ class Game:
         if first_time:
             for index, pokemon in enumerate(("bulbasaur", "charmander", "squirtle")):
                 pos = (index * 400 + 100, 300)
-                sprites.SelectScreenButton(
-                        "",
-                        color=(255, 255, 255),
-                        text_col=(0, 0, 0),
+                sprites.ImageButton(
+                        f"images/{pokemon}.png",
+                        (225, 225),
                         groups=(self.all_sprites, self.buttons),
-                        float_col="White",
                         pos=pos,
                         alpha=100,
-                        image=f"images/{pokemon}.png",
-                        image_size=(225, 225)
+                        return_=pokemon
                         )
             open_text = "Choose your starter!"
         else:
@@ -173,16 +170,13 @@ class Game:
                     if index % 10 == 0:
                         pos_y += 150
                 pos = (pos_x, pos_y)
-                sprites.SelectScreenButton(
-                        "",
-                        color=(255, 255, 255),
-                        text_col=(0, 0, 0),
+                sprites.ImageButton(
+                        f"images/{pokemon}.png",
+                        (100, 100),
                         groups=(self.all_sprites, self.buttons),
-                        float_col="White",
                         pos=pos,
                         alpha=100,
-                        image=f"images/{pokemon}.png",
-                        image_size=(100, 100)
+                        return_=pokemon
                         )
                 all_text.append(sprites.TextSurf(pokemon, (pos[0] - 45, pos[1] + 45)))
             open_text = "Choose your pokemon!"
@@ -219,7 +213,6 @@ class Game:
             for button in self.buttons:
                 collide = button.touch_box.collidepoint(mouse_pos)
                 button.handle_float(collide)
-                self.screen.blit(button.text, button.get_text_pos())
             self.screen.blit(text, (SCREEN_WIDTH / 2 - 150, 600))
             for text_surf in all_text:
                 self.screen.blit(text_surf.text, text_surf.pos)

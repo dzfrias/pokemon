@@ -32,26 +32,16 @@ class Button(Sprite):
             groups: tuple,
             text_col: tuple,
             float_col: tuple | str,
-            alpha: int = 255,
             func=None,
             args: tuple = None,
-            image: str = "",
-            image_size: tuple = ()
             ):
         super().__init__(*groups)
 
         # -Pygame Stuff-
         # Creates surface with text on it
         self.text = FONT.render(text, False, text_col)
-        if image:
-            self.surf = pygame.image.load(image).convert_alpha()
-            self.img = image
-            self.surf = pygame.transform.scale(self.surf, image_size)
-        else:
-            self.surf = Surface(self.text.get_size())
-            self.surf.fill(color)
-            self.img = ""
-        self.surf.set_alpha(alpha)
+        self.surf = Surface(self.text.get_size())
+        self.surf.fill(color)
         # Sets the surface of the actual button to the size of the text surface
         self.rect = self.surf.get_rect(center=pos)
         self.touch_box = self.rect.copy()
@@ -59,33 +49,38 @@ class Button(Sprite):
         self.floating = False
         self.float_col = float_col
         self.color = color
-        self.alpha = alpha
 
         # -Button Stuff-
         self.func = func
         self.args = args
-        # Cooldown for getting hit and flashing press_col
         self.hit_cooldown = Cooldown(10)
+
+    def get_text_pos(self):
+        size_x, size_y = self.text.get_size()
+        center = list(self.rect.center)
+        center[0] -= size_x / 2
+        center[1] -= size_y / 2
+        return center
+
+    def update(self):
+        self.hit_cooldown.update()
+
+    def collide(self, point):
+        return self.rect.collidepoint(point) or self.touch_box.collidepoint(point)
 
     def handle_float(self, collide):
         color = self.float_col
         if collide and not self.floating:
             self.rect.centery -= 20
             self.floating = True
-            if not self.img:
-                self.surf.fill(self.float_col)
         elif not collide:
             self.rect.centery = self.start_y
             self.floating = False
             color = self.color
         screen = pygame.display.get_surface()
-        if not self.img:
-            new_rect = self.rect.inflate(20, 20)
-            pygame.draw.rect(screen, color, new_rect, border_radius=10)
-            pygame.draw.rect(screen, "Black", new_rect, 5, border_radius=10)
-
-    def collide(self, point):
-        return self.rect.collidepoint(point) or self.touch_box.collidepoint(point)
+        new_rect = self.rect.inflate(20, 20)
+        pygame.draw.rect(screen, color, new_rect, border_radius=10)
+        pygame.draw.rect(screen, "Black", new_rect, 5, border_radius=10)
 
     def activate(self):
         if not self.hit_cooldown:
@@ -100,6 +95,53 @@ class Button(Sprite):
                 button.kill()
             return result
 
+
+class ImageButton(Button):
+    def __init__(
+            self,
+            image: str,
+            image_size: tuple,
+            *,
+            pos: tuple,
+            groups: tuple,
+            alpha: int,
+            return_
+            ):
+        Sprite.__init__(self, *groups)
+
+        # -Pygame Stuff-
+        self.surf = pygame.image.load(image).convert_alpha()
+        self.img = image
+        self.surf = pygame.transform.scale(self.surf, image_size)
+        self.surf.set_alpha(alpha)
+        # Sets the surface of the actual button to the size of the text surface
+        self.rect = self.surf.get_rect(center=pos)
+        self.touch_box = self.rect.copy()
+        self.start_y = self.rect.centery
+        self.floating = False
+        self.alpha = alpha
+
+        # -Button Stuff-
+        self.return_val = return_
+        self.hit_cooldown = Cooldown(10)
+
+    def handle_float(self, collide):
+        if collide and not self.floating:
+            self.rect.centery -= 20
+            self.floating = True
+        elif not collide:
+            self.rect.centery = self.start_y
+            self.floating = False
+
+    def collide(self, point):
+        return self.rect.collidepoint(point) or self.touch_box.collidepoint(point)
+
+    def activate(self):
+        return self.return_val
+
+    def get_text_pos(self):
+        raise NotImplementedError()
+
     def update(self):
         self.hit_cooldown.update()
         # Checks if cooldown is not active
@@ -107,21 +149,6 @@ class Button(Sprite):
             self.surf.set_alpha(self.alpha)
         elif not self.hit_cooldown and self.floating:
             self.surf.set_alpha(255)
-
-    def get_text_pos(self):
-        size_x, size_y = self.text.get_size()
-        center = list(self.rect.center)
-        center[0] -= size_x / 2
-        center[1] -= size_y / 2
-        return center
-
-    def __repr__(self):
-        return str(self.__dict__)
-
-
-class SelectScreenButton(Button):
-    def activate(self):
-        return self.img.removeprefix("images/").removesuffix(".png")
 
 
 class Message(Sprite):
