@@ -1,12 +1,11 @@
 import json
 import math
+import random
 import pygame
 from pygame import Surface
-from pygame.image import load
 from pygame.sprite import Sprite, Group
-from helper import Cooldown
 from pygame.locals import K_RETURN
-import random
+from helper import Cooldown
 
 pygame.font.init()
 
@@ -120,18 +119,20 @@ class ImageButton(Button):
         self.start_y = self.rect.centery
         self.floating = False
         self.alpha = alpha
+        self.enabled = True
 
         # -Button Stuff-
         self.return_val = return_
         self.hit_cooldown = Cooldown(10)
 
     def handle_float(self, collide):
-        if collide and not self.floating:
-            self.rect.centery -= 20
-            self.floating = True
-        elif not collide:
-            self.rect.centery = self.start_y
-            self.floating = False
+        if self.enabled:
+            if collide and not self.floating:
+                self.rect.centery -= 20
+                self.floating = True
+            elif not collide:
+                self.rect.centery = self.start_y
+                self.floating = False
 
     def collide(self, point):
         return self.rect.collidepoint(point) or self.touch_box.collidepoint(point)
@@ -150,6 +151,10 @@ class ImageButton(Button):
         elif not self.hit_cooldown and self.floating:
             self.surf.set_alpha(255)
 
+    def disable(self):
+        self.alpha = 255
+        self.enabled = False
+
 
 class Message(Sprite):
     def __init__(self, text, pos, groups):
@@ -158,12 +163,15 @@ class Message(Sprite):
         self.surf = FONT.render(text, True, "White")
         self.rect = self.surf.get_rect(center=pos)
         self.text = text
+        # Timer for when the message can be advanced
         self.timer = 40
 
     def update(self, pressed):
+        # Gets the integer value for if the enter key is pressed
         enter = pressed[K_RETURN]
         if enter and not self.timer:
             self.kill()
+            # Marks as seen so the main loop can advance
             self.seen = True
         if self.timer > 0:
             self.timer -= 1
@@ -173,7 +181,7 @@ class Message(Sprite):
 
 
 class Pokemon(Sprite):
-    def __init__(self, name: str, groups: tuple[Group], xp=None):
+    def __init__(self, name: str, groups: tuple[Group], given_name="", xp=None):
         super().__init__(*groups)
 
         # -Pokemon Stuff-
@@ -188,9 +196,11 @@ class Pokemon(Sprite):
         self.defense = pokemon["Defense"]
         self.speed = pokemon["Speed"]
         if xp is None:
+            # Sets xp to the default if not specified otherwise
             self.xp = pokemon["Experience"]
         else:
             self.xp = xp
+        self.given_name = given_name
 
         # -Pygame Stuff-
         self.surf = pygame.image.load(f"images/{self.name.lower()}.png").convert_alpha()
@@ -204,27 +214,32 @@ class Pokemon(Sprite):
         self.timer = 0
         self.offset_y = 0
 
-    # Method to return the level of the pokemon
     def level(self):
+        """Return the level of the pokemon"""
         return math.floor(self.xp**(1/3))
 
     def draw_bar(self):
         if not self.timer % 20:
+            # Randomly moves every third of a second
             self.offset_y = random.randint(100, 106)
         self.timer += 1
         pos = (self.rect.centerx - 90, self.rect.centery - self.offset_y)
         screen = pygame.display.get_surface()
 
+        # Creates text with the current hp in numbers and puts it over the
+        # health bar
         hp_text = SMALL_FONT.render(
                 f"{int(self.hp)}/{self.max_hp}", True, "White")
         screen.blit(hp_text, (self.rect.centerx - 30, pos[1] - 40))
 
+        # Creates a rect for the current health
         rect = pygame.Rect(*pos, self.hp / self.hp_ratio, 25)
         pygame.draw.rect(screen, "#af0303", rect)
+        # Draws white border around health bar
         pygame.draw.rect(screen, "White", (*pos, self.bar_len, 25), 4)
 
-    # Attack Method
     def use_move(self, move, opponent):
+        """Uses specified move on opponent"""
         messages = []
         # Code to decide whether the attack is a critical hit
         critical = 1
@@ -292,13 +307,14 @@ class Slash(Sprite):
         # Creates a surface
         surf = pygame.Surface(rect.size, pygame.SRCALPHA)
         if not self.timer % 7:
-            if surf.get_alpha == 0:
+            # Turns the slash invisible every 7 frames
+            if not surf.get_alpha:
                 surf.set_alpha(255)
             else:
                 surf.set_alpha(0)
         # Draws the ellipse on the surface
         pygame.draw.ellipse(surf, (255, 255, 0), (0, 0, *rect.size))
-        # Rotate the surface
+        # Rotate the surface based on the angle
         rotate_surf = pygame.transform.rotate(surf, self.angle)
         self.screen.blit(rotate_surf, rotate_surf.get_rect(center=rect.center))
         if not self.timer:
@@ -315,3 +331,35 @@ class TextSurf:
         screen = pygame.display.get_surface()
         screen.blit(self.text, self.pos)
 
+
+class InputBox:
+    def __init__(self, pos, w, h, text=''):
+        self.rect = pygame.Rect(*pos, w, h)
+        self.color = "White"
+        self.text = text
+        self.txt_surface = FONT.render(text, True, self.color)
+        self.usable = False
+
+    def handle_event(self, event):
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_RETURN:
+                self.done = True
+                return self.text
+            elif event.key == pygame.K_BACKSPACE:
+                self.text = self.text[:-1]
+            elif len(self.text) != 15:
+                self.text += event.unicode
+            # Re-render the text.
+            self.txt_surface = FONT.render(self.text, True, self.color)
+        return None
+
+    def update(self):
+        # Resize the box if the text is too long.
+        width = max(200, self.txt_surface.get_width()+10)
+        self.rect.w = width
+
+    def draw(self, screen):
+        # Blit the text.
+        screen.blit(self.txt_surface, (self.rect.x+5, self.rect.y+5))
+        # Blit the rect.
+        pygame.draw.rect(screen, self.color, self.rect, 2)

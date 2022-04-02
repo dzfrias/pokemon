@@ -1,2 +1,30 @@
 {
+    "magneto": {
+        "xp": 65,
+        "type": "Magnemite"
+    },
+    "hello": {
+        "xp": 10000000000000000,
+        "type": "Charmander"
+    },
+    "hello2": {
+        "xp": 61,
+        "type": "Cutiefly"
+    },
+    "ewgong!": {
+        "xp": 166,
+        "type": "Dewgong"
+    },
+    "magnetus": {
+        "xp": 65,
+        "type": "Magnemite"
+    },
+    "hwllo": {
+        "xp": 64,
+        "type": "Bulbasaur"
+    },
+    "helo its me": {
+        "xp": 44,
+        "type": "Cleffa"
+    }
 }
