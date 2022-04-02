@@ -8,6 +8,8 @@ import sys
 from config import SCREEN_HEIGHT, SCREEN_WIDTH
 import sprites
 import random
+import json
+from os.path import getsize
 
 
 class Game:
@@ -31,6 +33,8 @@ class Game:
         self.current_message = None
         self.background = pygame.image.load("images/background.png").convert()
         self.background = pygame.transform.scale(self.background, [1000, 750])
+        with open("pokemon.json") as f:
+            self.pokedex = json.load(f)
 
     def player_turn(self):
         # Get the appropriate button spread depending on the amount of moves
@@ -58,8 +62,11 @@ class Game:
                            )
             self.p_turn = False
 
-    def battle(self, pokemon_name):
-        self.player_pokemon = sprites.Pokemon(pokemon_name, (self.all_sprites,))
+    def log_pokemon(self, pokemon):
+        self.pokedex[pokemon.name] = pokemon.xp
+
+    def battle(self, pokemon_name, xp=None):
+        self.player_pokemon = sprites.Pokemon(pokemon_name, (self.all_sprites,), xp)
         self.cp_pokemon = sprites.Pokemon(random.choice(list(sprites.POKEMON.keys())), (self.all_sprites, ))
         self.player_pokemon.rect.center = (150, 500)
         self.cp_pokemon.rect.center = (800, 375)
@@ -92,7 +99,11 @@ class Game:
                                 results = button.activate()
                                 for result in results:
                                     self.messages.append(result)
+                                    if "fainted" in result:
+                                        self.log_pokemon(self.cp_pokemon)
+                                        print("Opponent lost")
 
+            # -Turn Order-
             if self.current_message is None or self.current_message.seen:
                 try:
                     self.current_message = sprites.Message(self.messages.pop(0), (500, 600), (self.all_sprites, self.text))
@@ -104,6 +115,9 @@ class Game:
                 # Computer turn
                 self.messages = self.cp_pokemon.use_move(self.cp_pokemon.moves[-1], self.player_pokemon)
                 self.p_turn = True
+                if "fainted" in self.messages[-1]:
+                    self.log_pokemon(self.player_pokemon)
+                    print("Player lost!")
 
             pressed = pygame.key.get_pressed()
             self.buttons.update()
@@ -125,26 +139,55 @@ class Game:
             pygame.display.flip()
             self.clock.tick(60)
 
+        self.log_pokemon(self.player_pokemon)
+        with open("pokemon.json", "w") as f:
+            json.dump(self.pokedex, f, indent=4)
         pygame.quit()
         pygame.display.quit()
         sys.exit()
 
-    def opening_screen(self):
-        for index, pokemon in enumerate(("bulbasaur", "charmander", "squirtle")):
-            pos = (index * 400 + 100, 300)
-            sprites.SelectScreenButton(
-                    "",
-                    color=(255, 255, 255),
-                    text_col=(0, 0, 0),
-                    groups=(self.all_sprites, self.buttons),
-                    float_col="White",
-                    pos=pos,
-                    alpha=100,
-                    image=f"images/{pokemon}.png",
-                    image_size=(225, 225)
-                    )
+    def opening_screen(self, first_time):
+        all_text = []
+        if first_time:
+            for index, pokemon in enumerate(("bulbasaur", "charmander", "squirtle")):
+                pos = (index * 400 + 100, 300)
+                sprites.SelectScreenButton(
+                        "",
+                        color=(255, 255, 255),
+                        text_col=(0, 0, 0),
+                        groups=(self.all_sprites, self.buttons),
+                        float_col="White",
+                        pos=pos,
+                        alpha=100,
+                        image=f"images/{pokemon}.png",
+                        image_size=(225, 225)
+                        )
+            open_text = "Choose your starter!"
+        else:
+            pos_y = 100
+            START_AMOUNT = 80
+            for index, pokemon in enumerate(self.pokedex.keys()):
+                pos_x = index * 150 + START_AMOUNT
+                if index > 9:
+                    pos_x = (index - 10) * 150 + START_AMOUNT
+                    if index % 10 == 0:
+                        pos_y += 150
+                pos = (pos_x, pos_y)
+                sprites.SelectScreenButton(
+                        "",
+                        color=(255, 255, 255),
+                        text_col=(0, 0, 0),
+                        groups=(self.all_sprites, self.buttons),
+                        float_col="White",
+                        pos=pos,
+                        alpha=100,
+                        image=f"images/{pokemon}.png",
+                        image_size=(100, 100)
+                        )
+                all_text.append(sprites.TextSurf(pokemon, (pos[0] - 45, pos[1] + 45)))
+            open_text = "Choose your pokemon!"
         running = True
-        text = sprites.FONT.render("Choose your starter!", True, (225, 225, 225))
+        text = sprites.FONT.render(open_text, True, (225, 225, 225))
         while running:
             mouse_pos = pygame.mouse.get_pos()
 
@@ -164,7 +207,7 @@ class Game:
                     if event.button == 1:
                         for button in self.buttons:
                             if button.collide(mouse_pos):
-                                pokemon = button.activate()
+                                pokemon = button.activate().title()
                                 running = False
 
             self.buttons.update()
@@ -178,15 +221,21 @@ class Game:
                 button.handle_float(collide)
                 self.screen.blit(button.text, button.get_text_pos())
             self.screen.blit(text, (SCREEN_WIDTH / 2 - 150, 600))
+            for text_surf in all_text:
+                self.screen.blit(text_surf.text, text_surf.pos)
 
             pygame.display.flip()
             self.clock.tick(60)
 
         for sprite in self.all_sprites:
             sprite.kill()
-        self.battle(pokemon.title())
+        self.battle(pokemon)
 
 
 if __name__ == "__main__":
-    Game().opening_screen()
+    if getsize("pokemon.json") <= 4:
+        Game().opening_screen(True)
+    else:
+        # Pokemon select screen here
+        Game().opening_screen(False)
 

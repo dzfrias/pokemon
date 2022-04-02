@@ -146,7 +146,7 @@ class Message(Sprite):
 
 
 class Pokemon(Sprite):
-    def __init__(self, name: str, groups: tuple[Group]):
+    def __init__(self, name: str, groups: tuple[Group], xp=None):
         super().__init__(*groups)
 
         # -Pokemon Stuff-
@@ -160,7 +160,10 @@ class Pokemon(Sprite):
         self.attack = pokemon["Attack"]
         self.defense = pokemon["Defense"]
         self.speed = pokemon["Speed"]
-        self.xp = pokemon["Experience"]
+        if xp is None:
+            self.xp = pokemon["Experience"]
+        else:
+            self.xp = xp
 
         # -Pygame Stuff-
         self.surf = pygame.image.load(f"images/{self.name.lower()}.png").convert_alpha()
@@ -230,6 +233,8 @@ class Pokemon(Sprite):
         messages.insert(1, f"Damage dealt: {int(damage)}")
         opponent.hp -= damage
         Slash(opponent.rect.center, 300, (self.particles,))
+        if opponent.hp <= 0:
+            messages.append(f"{opponent.name} fainted!")
         return messages
 
 
@@ -272,4 +277,14 @@ class Slash(Sprite):
         if not self.timer:
             self.kill()
         self.timer -= 1
+
+
+class TextSurf:
+    def __init__(self, text, pos):
+        self.text = SMALL_FONT.render(text, True, (255, 255, 255))
+        self.pos = pos
+
+    def blit(self):
+        screen = pygame.display.get_surface()
+        screen.blit(self.text, self.pos)
 
