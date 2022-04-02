@@ -67,6 +67,9 @@ class Button(Sprite):
             self.rect.centery = self.start_y
             self.floating = False
 
+    def collide(self, point):
+        return self.rect.collidepoint(point) or self.touch_box.collidepoint(point)
+
     def activate(self):
         if not self.hit_cooldown:
             self.surf.fill(self.press_col)
@@ -139,10 +142,9 @@ class Pokemon(Sprite):
         self.xp = pokemon["Experience"]
 
         # -Pygame Stuff-
-        # self.surf = load(pokemon["Image"])
-        self.surf = Surface((100, 100))
+        self.surf = pygame.image.load(f"images/{self.name.lower()}.png").convert_alpha()
+        self.surf = pygame.transform.scale(self.surf, [150, 150])
         self.rect = self.surf.get_rect()
-        self.surf.fill((255, 255, 255))
 
         # -Health Bar-
         self.bar_len = 200
