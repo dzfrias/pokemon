@@ -7,6 +7,7 @@ from pygame.locals import (
 import sys
 from config import SCREEN_HEIGHT, SCREEN_WIDTH
 import sprites
+import random
 
 
 class Game:
@@ -59,7 +60,7 @@ class Game:
 
     def battle(self, pokemon_name):
         self.player_pokemon = sprites.Pokemon(pokemon_name, (self.all_sprites,))
-        self.cp_pokemon = sprites.Pokemon("Squirtle", (self.all_sprites, ))
+        self.cp_pokemon = sprites.Pokemon(random.choice(list(sprites.POKEMON.keys())), (self.all_sprites, ))
         self.player_pokemon.rect.center = (150, 500)
         self.cp_pokemon.rect.center = (800, 375)
 
