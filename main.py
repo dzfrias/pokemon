@@ -64,7 +64,7 @@ class Game:
                            color=(255, 255, 255),
                            text_col=(0, 0, 0),
                            groups=(self.all_sprites, self.buttons, self.move_buttons),
-                           float_col=(246, 213, 109),
+                           float_col="#ffd700",
                            press_col=(215, 0, 64),
                            func=self.player_pokemon.use_move,
                            args=(move, self.cp_pokemon)
@@ -118,6 +118,8 @@ class Game:
                 collide = button.touch_box.collidepoint(mouse_pos)
                 button.handle_float(collide)
                 self.screen.blit(button.text, button.get_text_pos())
+            for pokemon in (self.player_pokemon, self.cp_pokemon):
+                pokemon.draw_bar()
 
             pygame.display.flip()
             self.clock.tick(60)

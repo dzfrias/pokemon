@@ -19,6 +19,7 @@ with open("moves.json") as json_file:
     MOVES_DICTIONARY = json.load(json_file)
 
 FONT = pygame.font.SysFont("Comic Sans MS", 30)
+SMALL_FONT = pygame.font.SysFont("Comic Sans MS", 25)
 
 
 class Button(Sprite):
@@ -31,7 +32,7 @@ class Button(Sprite):
             groups: tuple,
             press_col: tuple,
             text_col: tuple,
-            float_col: tuple,
+            float_col: tuple | str,
             func=None,
             args: tuple = None
             ):
@@ -95,8 +96,9 @@ class Button(Sprite):
         center[1] -= size_y / 2
         return center
 
-        def __repr__(self):
-            return str(self.__dict__)
+    def __repr__(self):
+        return str(self.__dict__)
+
 
 class Message(Sprite):
     def __init__(self, text, pos, groups):
@@ -105,7 +107,7 @@ class Message(Sprite):
         self.surf = FONT.render(text, True, "White")
         self.rect = self.surf.get_rect(center=pos)
         self.text = text
-        self.timer = 60
+        self.timer = 40
 
     def update(self, pressed):
         enter = pressed[K_RETURN]
@@ -128,6 +130,7 @@ class Pokemon(Sprite):
         self.name = name
         self.type = pokemon["Type"]
         self.hp = pokemon["HP"]
+        self.max_hp = self.hp
         # Creates a Move instance for each name in the pokemon["Moves"] entry
         self.moves = [Move(move_name) for move_name in pokemon["Moves"]]
         self.attack = pokemon["Attack"]
@@ -141,9 +144,30 @@ class Pokemon(Sprite):
         self.rect = self.surf.get_rect()
         self.surf.fill((255, 255, 255))
 
+        # -Health Bar-
+        self.bar_len = 200
+        self.hp_ratio = self.max_hp / self.bar_len
+        self.timer = 0
+        self.offset_y = 0
+
     # Method to return the level of the pokemon
     def level(self):
         return math.floor(self.xp**(1/3))
+
+    def draw_bar(self):
+        if not self.timer % 20:
+            self.offset_y = random.randint(80, 86)
+        self.timer += 1
+        pos = (self.rect.centerx - 70, self.rect.centery - self.offset_y)
+        screen = pygame.display.get_surface()
+
+        hp_text = SMALL_FONT.render(
+                f"{int(self.hp)}/{self.max_hp}", True, "White")
+        screen.blit(hp_text, (self.rect.centerx - 10, pos[1] - 40))
+
+        rect = pygame.Rect(*pos, self.hp / self.hp_ratio, 25)
+        pygame.draw.rect(screen, "#af0303", rect)
+        pygame.draw.rect(screen, "White", (*pos, self.bar_len, 25), 4)
 
     # Attack Method
     def use_move(self, move, opponent):
@@ -184,11 +208,6 @@ class Pokemon(Sprite):
         return messages
 
 
-# class CPPokemon(Pokemon):
-#     def attack(self, pokemon):
-#         self
-
-
 # Class to read in information from the move dictionary
 class Move:
     def __init__(self, move_name):
@@ -198,8 +217,4 @@ class Move:
         self.move_type = stats["type"]
         self.super_effective = stats["super effective against"]
         self.not_effective = stats["not very effective against"]
-
-    def update(self):
-        pass
-
 
