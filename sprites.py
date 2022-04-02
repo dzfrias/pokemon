@@ -181,7 +181,7 @@ class Message(Sprite):
 
 
 class Pokemon(Sprite):
-    def __init__(self, name: str, groups: tuple[Group], given_name="", xp=None):
+    def __init__(self, name: str, groups: tuple, given_name="", xp=None):
         super().__init__(*groups)
 
         # -Pokemon Stuff-
@@ -207,12 +207,24 @@ class Pokemon(Sprite):
         self.surf = pygame.transform.scale(self.surf, [150, 150])
         self.rect = self.surf.get_rect()
         self.particles = pygame.sprite.Group()
+        self.hit_timer = Cooldown(55)
+        self.x_off = False
 
         # -Health Bar-
         self.bar_len = 200
         self.hp_ratio = self.max_hp / self.bar_len
         self.timer = 0
         self.offset_y = 0
+
+    def update(self):
+        self.hit_timer.update()
+        if self.hit_timer:
+            if not self.x_off and not int(self.hit_timer) % 2:
+                self.rect.centerx += 5
+                self.x_off = True
+            elif not int(self.hit_timer) % 2:
+                self.rect.centerx -= 5
+                self.x_off = False
 
     def level(self):
         """Return the level of the pokemon"""
@@ -237,6 +249,11 @@ class Pokemon(Sprite):
         pygame.draw.rect(screen, "#af0303", rect)
         # Draws white border around health bar
         pygame.draw.rect(screen, "White", (*pos, self.bar_len, 25), 4)
+
+    def take_damage(self, amount):
+        self.hp -= amount
+        Slash(self.rect.center, 300, (self.particles,))
+        self.hit_timer.reset()
 
     def use_move(self, move, opponent):
         """Uses specified move on opponent"""
@@ -273,8 +290,7 @@ class Pokemon(Sprite):
             0)
         messages.insert(0, f"{self.name} used {move.name}!")
         messages.insert(1, f"Damage dealt: {int(damage)}")
-        opponent.hp -= damage
-        Slash(opponent.rect.center, 300, (self.particles,))
+        opponent.take_damage(damage)
         if opponent.hp <= 0:
             messages.append(f"{opponent.name} fainted!")
         return messages

@@ -25,6 +25,7 @@ class Game:
         self.buttons = pygame.sprite.Group()
         self.move_buttons = pygame.sprite.Group()
         self.text = pygame.sprite.Group()
+        self.pokemon = pygame.sprite.Group()
 
         # -Game stuff-
         self.player_pokemon = None
@@ -67,19 +68,28 @@ class Game:
         self.pokedex[name] = {"xp": pokemon.xp, "type": pokemon.name}
 
     def battle(self, pokemon_info):
-        self.player_pokemon = sprites.Pokemon(pokemon_info[1]["type"], (self.all_sprites,), pokemon_info[0], pokemon_info[1]["xp"])
+        self.player_pokemon = sprites.Pokemon(
+                pokemon_info[1]["type"],
+                (self.all_sprites, self.pokemon),
+                pokemon_info[0],
+                pokemon_info[1]["xp"]
+                )
         # Randomly chooses a pokemon for the computer
-        self.cp_pokemon = sprites.Pokemon(random.choice(list(sprites.POKEMON.keys())), (self.all_sprites, ))
+        self.cp_pokemon = sprites.Pokemon(
+                random.choice(list(sprites.POKEMON.keys())),
+                (self.all_sprites, self.pokemon)
+                )
         # Puts both pokemon into set positions
         self.player_pokemon.rect.center = (150, 500)
         self.cp_pokemon.rect.center = (800, 375)
 
         if self.player_pokemon.speed > self.cp_pokemon.speed:
             self.p_turn = True
-            self.messages.append("Player goes first!")
+            self.messages.append(
+                    f"{self.player_pokemon.given_name} goes first!")
         else:
             self.p_turn = False
-            self.messages.append("Computer goes first!")
+            self.messages.append(f"{self.cp_pokemon.name} goes first!")
 
         text_box = sprites.InputBox((400, 300), 200, 50)
 
@@ -113,6 +123,8 @@ class Game:
                             for result in results:
                                 self.messages.append(result)
                                 if "fainted" in result:
+                                    # Gives prompt to name pokemon, as a
+                                    # defeated pokemon is a captured one
                                     text_box.usable = True
 
             # -Turn Order-
@@ -138,6 +150,7 @@ class Game:
             self.buttons.update()
             # Messages need the enter key to be pressed in order to be seen
             self.text.update(pressed)
+            self.pokemon.update()
             if text_box.usable:
                 text_box.update()
 
@@ -155,6 +168,7 @@ class Game:
             for pokemon in (self.player_pokemon, self.cp_pokemon):
                 pokemon.particles.update()
             if text_box.usable:
+                # Prompts to name the pokemon
                 pygame.draw.circle(self.screen, (30, 30, 30), (SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2), 150)
                 capture_text = sprites.SMALL_FONT.render("Name your pokemon!", True, "White")
                 self.screen.blit(capture_text, (380, 400))
@@ -183,7 +197,7 @@ class Game:
                         alpha=100,
                         return_=pokemon
                         )
-            open_text = "Choose your starter!"
+            open_text = "Choose and name your starter!"
         else:
             pos_y = 100
             START_AMOUNT = 80
@@ -208,7 +222,7 @@ class Game:
             open_text = "Choose your pokemon!"
 
         # Textbox is only usable in this screen when first_time is true
-        text_box = sprites.InputBox((500, 500), 200, 60)
+        text_box = sprites.InputBox((400, 500), 200, 60)
 
         text = sprites.FONT.render(open_text, True, (225, 225, 225))
         running = True
@@ -271,7 +285,8 @@ class Game:
                 # so hitting the button is easy when it floats upwards
                 collide = button.touch_box.collidepoint(mouse_pos)
                 button.handle_float(collide)
-            self.screen.blit(text, (SCREEN_WIDTH / 2 - 150, 600))
+            text_offset = text.get_width() / 2
+            self.screen.blit(text, (SCREEN_WIDTH / 2 - text_offset, 600))
             for text_surf in all_text:
                 self.screen.blit(text_surf.text, text_surf.pos)
             if text_box.usable:
