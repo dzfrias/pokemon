@@ -52,14 +52,13 @@ class Game:
                            text_col=(0, 0, 0),
                            groups=(self.all_sprites, self.buttons, self.move_buttons),
                            float_col="#ffd700",
-                           press_col=(215, 0, 64),
                            func=self.player_pokemon.use_move,
                            args=(move, self.cp_pokemon)
                            )
             self.p_turn = False
 
     def battle(self, pokemon_name):
-        self.player_pokemon = sprites.Pokemon(pokemon_name, (self.all_sprites, ))
+        self.player_pokemon = sprites.Pokemon(pokemon_name, (self.all_sprites,))
         self.cp_pokemon = sprites.Pokemon("Squirtle", (self.all_sprites, ))
         self.player_pokemon.rect.center = (150, 500)
         self.cp_pokemon.rect.center = (800, 375)
@@ -135,7 +134,6 @@ class Game:
                     color=(255, 255, 255),
                     text_col=(0, 0, 0),
                     groups=(self.all_sprites, self.buttons),
-                    press_col=(255, 0, 0),
                     float_col="White",
                     pos=pos,
                     alpha=100,

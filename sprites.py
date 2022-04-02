@@ -30,7 +30,6 @@ class Button(Sprite):
             pos: tuple,
             color: tuple,
             groups: tuple,
-            press_col: tuple,
             text_col: tuple,
             float_col: tuple | str,
             alpha: int = 255,
@@ -55,7 +54,6 @@ class Button(Sprite):
         self.surf.set_alpha(alpha)
         # Sets the surface of the actual button to the size of the text surface
         self.rect = self.surf.get_rect(center=pos)
-        self.press_col = press_col
         self.touch_box = self.rect.copy()
         self.start_y = self.rect.centery
         self.floating = False
@@ -70,6 +68,7 @@ class Button(Sprite):
         self.hit_cooldown = Cooldown(10)
 
     def handle_float(self, collide):
+        color = self.float_col
         if collide and not self.floating:
             self.rect.centery -= 20
             self.floating = True
@@ -78,13 +77,16 @@ class Button(Sprite):
         elif not collide:
             self.rect.centery = self.start_y
             self.floating = False
+            color = "White"
+        screen = pygame.display.get_surface()
+        if not self.img:
+            pygame.draw.rect(screen, color, self.rect.inflate(20, 20), border_radius=10)
 
     def collide(self, point):
         return self.rect.collidepoint(point) or self.touch_box.collidepoint(point)
 
     def activate(self):
         if not self.hit_cooldown:
-            self.surf.fill(self.press_col)
             # Starts the cooldown
             self.hit_cooldown.reset()
             try:
@@ -100,12 +102,8 @@ class Button(Sprite):
         self.hit_cooldown.update()
         # Checks if cooldown is not active
         if not self.hit_cooldown and not self.floating:
-            if not self.img:
-                self.surf.fill(self.color)
             self.surf.set_alpha(self.alpha)
         elif not self.hit_cooldown and self.floating:
-            if not self.img:
-                self.surf.fill(self.float_col)
             self.surf.set_alpha(255)
 
     def get_text_pos(self):
