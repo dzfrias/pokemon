@@ -48,7 +48,7 @@ class Game:
             pos = (index * spread + start, 650)
             sprites.Button(move.name,
                            pos=pos,
-                           color=(255, 255, 255),
+                           color=(208, 202, 208),
                            text_col=(0, 0, 0),
                            groups=(self.all_sprites, self.buttons, self.move_buttons),
                            float_col="#ffd700",

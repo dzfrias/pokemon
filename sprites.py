@@ -77,10 +77,12 @@ class Button(Sprite):
         elif not collide:
             self.rect.centery = self.start_y
             self.floating = False
-            color = "White"
+            color = self.color
         screen = pygame.display.get_surface()
         if not self.img:
-            pygame.draw.rect(screen, color, self.rect.inflate(20, 20), border_radius=10)
+            new_rect = self.rect.inflate(20, 20)
+            pygame.draw.rect(screen, color, new_rect, border_radius=10)
+            pygame.draw.rect(screen, "Black", new_rect, 5, border_radius=10)
 
     def collide(self, point):
         return self.rect.collidepoint(point) or self.touch_box.collidepoint(point)
