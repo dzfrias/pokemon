@@ -166,6 +166,7 @@ class Pokemon(Sprite):
         self.surf = pygame.image.load(f"images/{self.name.lower()}.png").convert_alpha()
         self.surf = pygame.transform.scale(self.surf, [150, 150])
         self.rect = self.surf.get_rect()
+        self.particles = pygame.sprite.Group()
 
         # -Health Bar-
         self.bar_len = 200
@@ -228,6 +229,7 @@ class Pokemon(Sprite):
         messages.insert(0, f"{self.name} used {move.name}!")
         messages.insert(1, f"Damage dealt: {int(damage)}")
         opponent.hp -= damage
+        Slash(opponent.rect.center, 300, (self.particles,))
         return messages
 
 
@@ -240,4 +242,34 @@ class Move:
         self.move_type = stats["type"]
         self.super_effective = stats["super effective against"]
         self.not_effective = stats["not very effective against"]
+
+
+class Slash(Sprite):
+    def __init__(self, pos, angle, groups):
+        super().__init__(*groups)
+        self.angle = -(angle - 90)
+        self.pos = list(pos)
+        self.timer = 50
+        self.width = 250
+        self.screen = pygame.display.get_surface()
+
+    def update(self):
+        # Creates a rectangle based on position and width
+        rect = pygame.Rect(*self.pos, self.width, 20)
+        rect.center = self.pos
+        # Creates a surface
+        surf = pygame.Surface(rect.size, pygame.SRCALPHA)
+        if not self.timer % 7:
+            if surf.get_alpha == 0:
+                surf.set_alpha(255)
+            else:
+                surf.set_alpha(0)
+        # Draws the ellipse on the surface
+        pygame.draw.ellipse(surf, (255, 255, 0), (0, 0, *rect.size))
+        # Rotate the surface
+        rotate_surf = pygame.transform.rotate(surf, self.angle)
+        self.screen.blit(rotate_surf, rotate_surf.get_rect(center=rect.center))
+        if not self.timer:
+            self.kill()
+        self.timer -= 1
 

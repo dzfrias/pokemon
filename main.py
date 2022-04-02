@@ -119,6 +119,8 @@ class Game:
                 self.screen.blit(button.text, button.get_text_pos())
             for pokemon in (self.player_pokemon, self.cp_pokemon):
                 pokemon.draw_bar()
+            for pokemon in (self.player_pokemon, self.cp_pokemon):
+                pokemon.particles.update()
 
             pygame.display.flip()
             self.clock.tick(60)
