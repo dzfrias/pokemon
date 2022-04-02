@@ -58,63 +58,6 @@ class Game:
                            )
             self.p_turn = False
 
-    def opening_screen(self):
-        for index, pokemon in enumerate(("bulbasaur", "charmander", "squirtle")):
-            pos = (index * 400 + 100, 300)
-            sprites.SelectScreenButton(
-                    "",
-                    color=(255, 255, 255),
-                    text_col=(0, 0, 0),
-                    groups=(self.all_sprites, self.buttons),
-                    press_col=(255, 0, 0),
-                    float_col="White",
-                    pos=pos,
-                    alpha=100,
-                    image=f"images/{pokemon}.png",
-                    image_size=(225, 225)
-                    )
-        running = True
-        pokemon = "Gengar"
-        while running:
-            mouse_pos = pygame.mouse.get_pos()
-
-            for event in pygame.event.get():
-                if event.type == KEYDOWN:
-                    if event.key == K_ESCAPE:
-                        pygame.quit()
-                        pygame.display.quit()
-                        sys.exit()
-
-                elif event.type == QUIT:
-                    pygame.quit()
-                    pygame.display.quit()
-                    sys.exit()
-
-                elif event.type == pygame.MOUSEBUTTONDOWN:
-                    if event.button == 1:
-                        for button in self.buttons:
-                            if button.collide(mouse_pos):
-                                pokemon = button.activate()
-                                running = False
-
-            self.buttons.update()
-
-            self.screen.fill((0, 0, 0))
-            for sprite in self.all_sprites:
-                self.screen.blit(sprite.surf, sprite.rect)
-            # Puts button text on the screen
-            for button in self.buttons:
-                collide = button.touch_box.collidepoint(mouse_pos)
-                button.handle_float(collide)
-                self.screen.blit(button.text, button.get_text_pos())
-
-            pygame.display.flip()
-            self.clock.tick(60)
-
-        for sprite in self.all_sprites:
-            sprite.kill()
-        self.battle(pokemon.title())
-
     def battle(self, pokemon_name):
         self.player_pokemon = sprites.Pokemon(pokemon_name, (self.all_sprites, ))
         self.cp_pokemon = sprites.Pokemon("Squirtle", (self.all_sprites, ))
@@ -183,6 +126,64 @@ class Game:
         pygame.quit()
         pygame.display.quit()
         sys.exit()
+
+    def opening_screen(self):
+        for index, pokemon in enumerate(("bulbasaur", "charmander", "squirtle")):
+            pos = (index * 400 + 100, 300)
+            sprites.SelectScreenButton(
+                    "",
+                    color=(255, 255, 255),
+                    text_col=(0, 0, 0),
+                    groups=(self.all_sprites, self.buttons),
+                    press_col=(255, 0, 0),
+                    float_col="White",
+                    pos=pos,
+                    alpha=100,
+                    image=f"images/{pokemon}.png",
+                    image_size=(225, 225)
+                    )
+        running = True
+        text = sprites.FONT.render("Choose your starter!", True, (225, 225, 225))
+        while running:
+            mouse_pos = pygame.mouse.get_pos()
+
+            for event in pygame.event.get():
+                if event.type == KEYDOWN:
+                    if event.key == K_ESCAPE:
+                        pygame.quit()
+                        pygame.display.quit()
+                        sys.exit()
+
+                elif event.type == QUIT:
+                    pygame.quit()
+                    pygame.display.quit()
+                    sys.exit()
+
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    if event.button == 1:
+                        for button in self.buttons:
+                            if button.collide(mouse_pos):
+                                pokemon = button.activate()
+                                running = False
+
+            self.buttons.update()
+
+            self.screen.fill((0, 0, 0))
+            for sprite in self.all_sprites:
+                self.screen.blit(sprite.surf, sprite.rect)
+            # Puts button text on the screen
+            for button in self.buttons:
+                collide = button.touch_box.collidepoint(mouse_pos)
+                button.handle_float(collide)
+                self.screen.blit(button.text, button.get_text_pos())
+            self.screen.blit(text, (SCREEN_WIDTH / 2 - 150, 600))
+
+            pygame.display.flip()
+            self.clock.tick(60)
+
+        for sprite in self.all_sprites:
+            sprite.kill()
+        self.battle(pokemon.title())
 
 
 if __name__ == "__main__":
