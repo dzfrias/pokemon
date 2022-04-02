@@ -33,24 +33,35 @@ class Button(Sprite):
             press_col: tuple,
             text_col: tuple,
             float_col: tuple | str,
+            alpha: int = 255,
             func=None,
-            args: tuple = None
+            args: tuple = None,
+            image: str = "",
+            image_size: tuple = ()
             ):
         super().__init__(*groups)
 
         # -Pygame Stuff-
         # Creates surface with text on it
         self.text = FONT.render(text, False, text_col)
+        if image:
+            self.surf = pygame.image.load(image).convert_alpha()
+            self.img = image
+            self.surf = pygame.transform.scale(self.surf, image_size)
+        else:
+            self.surf = Surface(self.text.get_size())
+            self.surf.fill(color)
+            self.img = ""
+        self.surf.set_alpha(alpha)
         # Sets the surface of the actual button to the size of the text surface
-        self.surf = Surface(self.text.get_size())
         self.rect = self.surf.get_rect(center=pos)
-        self.surf.fill(color)
         self.press_col = press_col
         self.touch_box = self.rect.copy()
         self.start_y = self.rect.centery
         self.floating = False
         self.float_col = float_col
         self.color = color
+        self.alpha = alpha
 
         # -Button Stuff-
         self.func = func
@@ -62,7 +73,8 @@ class Button(Sprite):
         if collide and not self.floating:
             self.rect.centery -= 20
             self.floating = True
-            self.surf.fill(self.float_col)
+            if not self.img:
+                self.surf.fill(self.float_col)
         elif not collide:
             self.rect.centery = self.start_y
             self.floating = False
@@ -88,9 +100,13 @@ class Button(Sprite):
         self.hit_cooldown.update()
         # Checks if cooldown is not active
         if not self.hit_cooldown and not self.floating:
-            self.surf.fill(self.color)
+            if not self.img:
+                self.surf.fill(self.color)
+            self.surf.set_alpha(self.alpha)
         elif not self.hit_cooldown and self.floating:
-            self.surf.fill(self.float_col)
+            if not self.img:
+                self.surf.fill(self.float_col)
+            self.surf.set_alpha(255)
 
     def get_text_pos(self):
         size_x, size_y = self.text.get_size()
@@ -101,6 +117,11 @@ class Button(Sprite):
 
     def __repr__(self):
         return str(self.__dict__)
+
+
+class SelectScreenButton(Button):
+    def activate(self):
+        return self.img.removeprefix("images/").removesuffix(".png")
 
 
 class Message(Sprite):
@@ -158,14 +179,14 @@ class Pokemon(Sprite):
 
     def draw_bar(self):
         if not self.timer % 20:
-            self.offset_y = random.randint(80, 86)
+            self.offset_y = random.randint(100, 106)
         self.timer += 1
-        pos = (self.rect.centerx - 70, self.rect.centery - self.offset_y)
+        pos = (self.rect.centerx - 90, self.rect.centery - self.offset_y)
         screen = pygame.display.get_surface()
 
         hp_text = SMALL_FONT.render(
                 f"{int(self.hp)}/{self.max_hp}", True, "White")
-        screen.blit(hp_text, (self.rect.centerx - 10, pos[1] - 40))
+        screen.blit(hp_text, (self.rect.centerx - 30, pos[1] - 40))
 
         rect = pygame.Rect(*pos, self.hp / self.hp_ratio, 25)
         pygame.draw.rect(screen, "#af0303", rect)

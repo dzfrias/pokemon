@@ -59,32 +59,43 @@ class Game:
             self.p_turn = False
 
     def opening_screen(self):
+        for index, pokemon in enumerate(("bulbasaur", "charmander", "squirtle")):
+            pos = (index * 400 + 100, 300)
+            sprites.SelectScreenButton(
+                    "",
+                    color=(255, 255, 255),
+                    text_col=(0, 0, 0),
+                    groups=(self.all_sprites, self.buttons),
+                    press_col=(255, 0, 0),
+                    float_col="White",
+                    pos=pos,
+                    alpha=100,
+                    image=f"images/{pokemon}.png",
+                    image_size=(225, 225)
+                    )
         running = True
-        button = sprites.Button(
-                "Hello",
-                color=(255, 255, 255),
-                text_col=(0, 0, 0),
-                groups=(self.all_sprites, self.buttons),
-                press_col=(255, 0, 0),
-                float_col="White",
-                pos=(500, 500)
-                )
+        pokemon = "Gengar"
         while running:
             mouse_pos = pygame.mouse.get_pos()
 
             for event in pygame.event.get():
                 if event.type == KEYDOWN:
                     if event.key == K_ESCAPE:
-                        running = False
+                        pygame.quit()
+                        pygame.display.quit()
+                        sys.exit()
 
                 elif event.type == QUIT:
-                    running = False
+                    pygame.quit()
+                    pygame.display.quit()
+                    sys.exit()
 
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:
-                        if button.collide(mouse_pos):
-                            button.activate()
-                            running = False
+                        for button in self.buttons:
+                            if button.collide(mouse_pos):
+                                pokemon = button.activate()
+                                running = False
 
             self.buttons.update()
 
@@ -102,10 +113,10 @@ class Game:
 
         for sprite in self.all_sprites:
             sprite.kill()
-        self.battle()
+        self.battle(pokemon.title())
 
-    def battle(self):
-        self.player_pokemon = sprites.Pokemon("Gengar", (self.all_sprites, ))
+    def battle(self, pokemon_name):
+        self.player_pokemon = sprites.Pokemon(pokemon_name, (self.all_sprites, ))
         self.cp_pokemon = sprites.Pokemon("Squirtle", (self.all_sprites, ))
         self.player_pokemon.rect.center = (150, 500)
         self.cp_pokemon.rect.center = (800, 375)
