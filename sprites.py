@@ -429,12 +429,13 @@ class TextSurf:
 class InputBox:
     """A box for the user to type into"""
 
-    def __init__(self, pos, w, h, text=''):
+    def __init__(self, pos, w, h, text="Enter name"):
         self.rect = pygame.Rect(*pos, w, h)
-        self.color = "White"
+        self.color = "Grey"
         self.text = text
         self.txt_surface = FONT.render(text, True, self.color)
         self.usable = False
+        self.typed = False
 
     def handle_event(self, event):
         """Handles the possibility of the user hitting a key"""
@@ -445,23 +446,26 @@ class InputBox:
             elif event.key == pygame.K_BACKSPACE:
                 self.text = self.text[:-1]
             elif len(self.text) != 15:
+                if not self.typed:
+                    self.text = ""
                 self.text += event.unicode
-            # Re-render the text.
+                self.typed = True
+            if self.typed:
+                self.color = "White"
+            # Re-render the text
             self.txt_surface = FONT.render(self.text, True, self.color)
         return None
 
     def update(self):
         """Resizes the box if the text gets to large"""
-        # Resize the box if the text is too long.
-        width = max(200, self.txt_surface.get_width()+10)
+        # Resize the box if the text is too long
+        width = max(200, self.txt_surface.get_width() + 10)
         self.rect.w = width
 
     def draw(self, screen):
         """Puts the box onto the screen"""
-        # Blit the text.
         screen.blit(self.txt_surface, (self.rect.x+5, self.rect.y+5))
-        # Blit the rect.
-        pygame.draw.rect(screen, self.color, self.rect, 2)
+        pygame.draw.rect(screen, "White", self.rect, 2, 10)
 
 
 class RisingBox:

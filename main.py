@@ -122,7 +122,7 @@ class Game:
             self.messages.append(f"{self.cp_pokemon.name} goes first!")
 
         # The input box for this screen, inactive by default
-        text_box = sprites.InputBox((400, 300), 200, 50)
+        text_box = sprites.InputBox((400, 290), 200, 50)
 
         running = True
         while running:
