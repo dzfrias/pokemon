@@ -44,6 +44,9 @@ class Game:
         self.pokeball_image = pygame.image.load("images/pokeball.png").convert_alpha()
         self.pokeball_image = pygame.transform.scale(self.pokeball_image, (350, 350))
 
+        with open("type_colors.json") as f:
+            self.TYPE_COLORS = json.load(f)
+
     def player_turn(self):
         """Creates the player UI when taking their turn"""
         # Get the appropriate button spread depending on the amount of moves
@@ -70,7 +73,7 @@ class Game:
                                self.all_sprites,
                                self.buttons,
                                self.move_buttons),
-                           float_col="#ffd700",
+                           float_col=self.TYPE_COLORS[move.move_type],
                            func=self.player_pokemon.use_and_damage,
                            args=(move, self.cp_pokemon)
                            )
