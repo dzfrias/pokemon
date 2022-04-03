@@ -46,11 +46,17 @@ class Button(Sprite):
         self.surf.fill(color)
         # Sets the surface of the actual button to the size of the text surface
         self.rect = self.surf.get_rect(center=pos)
-        self.touch_box = self.rect.copy()
+        self.touch_box = self.rect.copy().inflate(20, 20)
         self.start_y = self.rect.centery
         self.floating = False
         self.float_col = float_col
         self.color = color
+
+        # -Animation-
+        self.timer = 0
+        self.offset_y = 0
+        self.offset_x = 0
+        self.start_x = self.rect.centerx
 
         # -Button Stuff-
         self.func = func
@@ -80,13 +86,19 @@ class Button(Sprite):
             self.rect.centery -= 20
             self.floating = True
         elif not collide:
-            self.rect.centery = self.start_y
+            self.rect.centery = self.start_y + self.offset_y
+            self.rect.centerx = self.start_x + self.offset_x
             self.floating = False
             color = self.color
         screen = pygame.display.get_surface()
         new_rect = self.rect.inflate(20, 20)
         pygame.draw.rect(screen, color, new_rect, border_radius=10)
         pygame.draw.rect(screen, "Black", new_rect, 5, border_radius=10)
+        if not self.timer % 30:
+            self.offset_y = random.randint(1, 5)
+        elif not self.timer % 40:
+            self.offset_x = random.randint(1, 5)
+        self.timer += 1
 
     def activate(self):
         """Call the assigned function with the associated arguments"""
