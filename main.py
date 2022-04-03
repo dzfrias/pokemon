@@ -133,10 +133,13 @@ class Game:
             if (self.current_message is None or self.current_message.seen) and not text_box.usable:
                 try:
                     # Turns sets the current message
-                    self.current_message = sprites.Message(self.messages.pop(0), (500, 600), (self.all_sprites, self.text))
+                    self.current_message = sprites.Message(
+                            self.messages.pop(0),
+                            (500, 600),
+                            (self.all_sprites, self.text))
                 except IndexError:
                     # Excepts when there are no messages
-                    pass
+                    sprites.Message.reuse = False
             if self.p_turn and not self.move_buttons and self.current_message.seen:
                 # Only starts a new player turn when the current message is seen
                 self.player_turn()

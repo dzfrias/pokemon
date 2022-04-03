@@ -158,6 +158,8 @@ class ImageButton(Button):
 
 
 class Message(Sprite):
+    reuse = False
+
     def __init__(self, text, pos, groups):
         super().__init__(*groups)
         self.seen = False
@@ -168,6 +170,8 @@ class Message(Sprite):
         self.timer = 40
         self.bar_rect = pygame.Rect(0, pos[0] + 80, 0, 50)
         self.bar_vel = 2
+        self.reuse_bar = self.__class__.reuse
+        self.__class__.reuse = True
 
     def update(self, pressed):
         # Gets the integer value for if the enter key is pressed
@@ -183,6 +187,8 @@ class Message(Sprite):
             self.bar_vel += 2.5
 
     def draw_bar(self, screen):
+        if self.reuse_bar:
+            self.bar_rect.w = SCREEN_WIDTH
         pygame.draw.rect(screen, "Black", self.bar_rect.inflate(5, 4), 5)
         pygame.draw.rect(screen, (225, 225, 225), self.bar_rect)
 
