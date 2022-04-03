@@ -4,15 +4,19 @@ from typing import Callable
 
 @dataclass(order=True)
 class Cooldown:
+    """A flexible cooldown that decreases across frames"""
+
     reset_val: int
     auto_reset: bool = field(kw_only=True, compare=False, default=False)
     func: Callable = field(kw_only=True, compare=False, default=None)
     args: tuple = field(kw_only=True, compare=False, default=())
 
     def __post_init__(self):
+        """Called on instance initialization"""
         self.value = 0
 
     def reset(self, reset_val=None, *, call_func=True):
+        """Sets the value to the reset value and calls the optional function"""
         if reset_val is None:
             self.value = self.reset_val
         else:
@@ -21,6 +25,7 @@ class Cooldown:
             self.func(*self.args)
 
     def update(self):
+        """Subtracts from the value if it is greater than 0"""
         if self.value:
             self.value -= 1
         elif self.auto_reset:

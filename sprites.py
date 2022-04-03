@@ -24,6 +24,7 @@ SMALL_FONT = pygame.font.SysFont("Comic Sans MS", 25)
 
 
 class Button(Sprite):
+    """Clickable buttons that float when hovered over"""
     def __init__(
             self,
             text: str,
@@ -57,6 +58,7 @@ class Button(Sprite):
         self.hit_cooldown = Cooldown(10)
 
     def get_text_pos(self):
+        """Gets the text centered on the button"""
         size_x, size_y = self.text.get_size()
         center = list(self.rect.center)
         center[0] -= size_x / 2
@@ -64,12 +66,15 @@ class Button(Sprite):
         return center
 
     def update(self):
+        """Update the cooldown of getting hit"""
         self.hit_cooldown.update()
 
     def collide(self, point):
+        """Check if one of the two hitboxes are collided with"""
         return self.rect.collidepoint(point) or self.touch_box.collidepoint(point)
 
     def handle_float(self, collide):
+        """Float if collided with"""
         color = self.float_col
         if collide and not self.floating:
             self.rect.centery -= 20
@@ -84,6 +89,7 @@ class Button(Sprite):
         pygame.draw.rect(screen, "Black", new_rect, 5, border_radius=10)
 
     def activate(self):
+        """Call the assigned function with the associated arguments"""
         if not self.hit_cooldown:
             # Starts the cooldown
             self.hit_cooldown.reset()
@@ -98,6 +104,7 @@ class Button(Sprite):
 
 
 class ImageButton(Button):
+    """Buttons with images, which can be transparent if not hovered over"""
     def __init__(
             self,
             image: str,
@@ -128,6 +135,7 @@ class ImageButton(Button):
         self.hit_cooldown = Cooldown(10)
 
     def handle_float(self, collide):
+        """Float in the air when collision is passed in"""
         if self.enabled:
             if collide and not self.floating:
                 self.rect.centery -= 20
@@ -136,16 +144,16 @@ class ImageButton(Button):
                 self.rect.centery = self.start_y
                 self.floating = False
 
-    def collide(self, point):
-        return self.rect.collidepoint(point) or self.touch_box.collidepoint(point)
-
     def activate(self):
+        """Returns the value assigned"""
         return self.return_val
 
     def get_text_pos(self):
+        """Not implemented for this subclass"""
         raise NotImplementedError()
 
     def update(self):
+        """Becomes transparent if the mouse is not hovering over it"""
         self.hit_cooldown.update()
         # Checks if cooldown is not active
         if not self.hit_cooldown and not self.floating:
@@ -154,12 +162,16 @@ class ImageButton(Button):
             self.surf.set_alpha(255)
 
     def disable(self):
+        """Disable the button from being presssed"""
         self.alpha = 255
         self.enabled = False
 
 
 class Message(Sprite):
+    """A message to be displayed to the player"""
     reuse = False
+    # Messages that freeze the screen and need to be manually advanced
+    FROZEN = ("Name your pokemon!",)
 
     def __init__(self, text, pos, groups):
         super().__init__(*groups)
@@ -172,12 +184,15 @@ class Message(Sprite):
         self.bar_rect = pygame.Rect(0, pos[0] + 80, 0, 50)
         self.bar_vel = 2
         self.reuse_bar = self.__class__.reuse
+        # Reuses bar every after the first message. This is undone once all
+        # messages in a group are seen
         self.__class__.reuse = True
 
     def update(self, pressed):
+        """Advance the bar and sense for when return is pressed"""
         # Gets the integer value for if the enter key is pressed
         enter = pressed[K_RETURN]
-        if enter and not self.timer:
+        if enter and not self.timer and self.text not in self.__class__.FROZEN:
             self.kill()
             # Marks as seen so the main loop can advance
             self.seen = True
@@ -187,17 +202,33 @@ class Message(Sprite):
             self.bar_rect.w += self.bar_vel
             self.bar_vel += 2.5
 
+    def release(self):
+        """Manually advance to the next messsage, can only be done if
+        the message is a special frozen message"""
+        if self.text not in self.__class__.FROZEN:
+            # Can only manually release a message if it is frozen
+            raise NotImplementedError()
+        self.kill()
+        self.seen = True
+
     def draw_bar(self, screen):
+        """Draws the bar that is animated when the messages appears"""
         if self.reuse_bar:
             self.bar_rect.w = SCREEN_WIDTH
-        pygame.draw.rect(screen, "Black", self.bar_rect.inflate(5, 4), 5)
         pygame.draw.rect(screen, (225, 225, 225), self.bar_rect)
+        # Draws a thin outline around the bar
+        pygame.draw.rect(screen, "Black", self.bar_rect.inflate(5, 4), 5)
+
+    def __ne__(self, other: str):
+        return self.text != other
 
     def __repr__(self):
         return f"{self.__class__.__name__}({self.text}, pos={self.rect.center})"
 
 
 class Pokemon(Sprite):
+    """The pokemon to battle with"""
+
     def __init__(self, name: str, groups: tuple, given_name="", xp=None):
         super().__init__(*groups)
 
@@ -234,6 +265,7 @@ class Pokemon(Sprite):
         self.offset_y = 0
 
     def update(self):
+        """Handles x offsets (when getting damaged)"""
         self.hit_timer.update()
         if self.hit_timer:
             if not self.x_off and not int(self.hit_timer) % 2:
@@ -248,6 +280,7 @@ class Pokemon(Sprite):
         return math.floor(self.xp**(1/3))
 
     def draw_bar(self):
+        """Draws the HP bar of the pokemon"""
         if not self.timer % 20:
             # Randomly moves every third of a second
             self.offset_y = random.randint(100, 106)
@@ -268,6 +301,8 @@ class Pokemon(Sprite):
         pygame.draw.rect(screen, "White", (*pos, self.bar_len, 25), 4)
 
     def take_damage(self, amount):
+        """Subtracts from hp, creates a Slash particle effect, and starts
+        a timer to make an x_offset of the position for some time"""
         self.hp -= amount
         Slash(self.rect.center, 300, (self.particles,))
         self.hit_timer.reset()
@@ -313,6 +348,7 @@ class Pokemon(Sprite):
         return damage, messages
 
     def choose_move(self, target):
+        """Finds the most damaging move to a pokemon"""
         MoveResult = namedtuple("MoveResult", "damage messages")
         big_damage = 0
         big_messages = ""
@@ -324,6 +360,7 @@ class Pokemon(Sprite):
         return MoveResult(big_damage, big_messages)
 
     def use_and_damage(self, move, opponent):
+        """Calculates the damage of a move and applies it to the target"""
         result = self.use_move(move, opponent)
         opponent.take_damage(result[0])
         return result[1]
@@ -331,6 +368,8 @@ class Pokemon(Sprite):
 
 # Class to read in information from the move dictionary
 class Move:
+    """Holds information for a pokemon's move"""
+
     def __init__(self, move_name):
         self.name = move_name
         stats = MOVES_DICTIONARY[self.name]
@@ -341,6 +380,8 @@ class Move:
 
 
 class Slash(Sprite):
+    """An angled ellipse that looks like a slash"""
+
     def __init__(self, pos, angle, groups):
         super().__init__(*groups)
         self.angle = -(angle - 90)
@@ -350,6 +391,7 @@ class Slash(Sprite):
         self.screen = pygame.display.get_surface()
 
     def update(self):
+        """Draws onto the screen and creates rotated surface"""
         # Creates a rectangle based on position and width
         rect = pygame.Rect(*self.pos, self.width, 20)
         rect.center = self.pos
@@ -372,16 +414,21 @@ class Slash(Sprite):
 
 
 class TextSurf:
+    """A text surface with a position"""
+
     def __init__(self, text, pos):
         self.text = SMALL_FONT.render(text, True, (255, 255, 255))
         self.pos = pos
 
     def blit(self):
+        """Puts the text onto the screen"""
         screen = pygame.display.get_surface()
         screen.blit(self.text, self.pos)
 
 
 class InputBox:
+    """A box for the user to type into"""
+
     def __init__(self, pos, w, h, text=''):
         self.rect = pygame.Rect(*pos, w, h)
         self.color = "White"
@@ -390,6 +437,7 @@ class InputBox:
         self.usable = False
 
     def handle_event(self, event):
+        """Handles the possibility of the user hitting a key"""
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_RETURN:
                 self.done = True
@@ -403,11 +451,13 @@ class InputBox:
         return None
 
     def update(self):
+        """Resizes the box if the text gets to large"""
         # Resize the box if the text is too long.
         width = max(200, self.txt_surface.get_width()+10)
         self.rect.w = width
 
     def draw(self, screen):
+        """Puts the box onto the screen"""
         # Blit the text.
         screen.blit(self.txt_surface, (self.rect.x+5, self.rect.y+5))
         # Blit the rect.
@@ -415,12 +465,15 @@ class InputBox:
 
 
 class RisingBox:
+    """A box that will rise until a certain height"""
+
     def __init__(self, height_max):
         self.rect = pygame.Rect(0, SCREEN_HEIGHT, SCREEN_WIDTH, 500)
         self.increase = 1
         self.max = height_max
 
     def draw(self, screen):
+        """Puts the box onto the screen and increases its y position"""
         pygame.draw.rect(screen, (225, 225, 225), self.rect)
         pygame.draw.rect(screen, "Black", self.rect.inflate(20, 20), 10)
         if self.rect.top > self.max:

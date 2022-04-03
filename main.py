@@ -11,8 +11,12 @@ import random
 import json
 from os.path import getsize
 
+GOD_MODE = False
+
 
 class Game:
+    """Manages the event loops of the game"""
+
     def __init__(self):
         # -General setup-
         pygame.init()
@@ -41,6 +45,7 @@ class Game:
         self.pokeball_image = pygame.transform.scale(self.pokeball_image, (350, 350))
 
     def player_turn(self):
+        """Creates the player UI when taking their turn"""
         # Get the appropriate button spread depending on the amount of moves
         move_len = len(self.player_pokemon.moves)
         if move_len == 5:
@@ -55,11 +60,16 @@ class Game:
         for index, move in enumerate(self.player_pokemon.moves):
             # Spreads the buttons out evenly across the screen
             pos = (index * spread + start, 650)
+            # Creates a button to damage the pokemon with the corresponding
+            # move when pressed
             sprites.Button(move.name,
                            pos=pos,
                            color=(198, 192, 198),
                            text_col=(0, 0, 0),
-                           groups=(self.all_sprites, self.buttons, self.move_buttons),
+                           groups=(
+                               self.all_sprites,
+                               self.buttons,
+                               self.move_buttons),
                            float_col="#ffd700",
                            func=self.player_pokemon.use_and_damage,
                            args=(move, self.cp_pokemon)
@@ -68,12 +78,16 @@ class Game:
         self.button_background = sprites.RisingBox(600)
 
     def draw_capture(self, text_box):
+        """Draws the UI for when the player beats the opponent"""
         pokeball_pos = (SCREEN_WIDTH / 2 - 175, SCREEN_HEIGHT / 2 - 175)
         self.screen.blit(self.pokeball_image, pokeball_pos)
-        # Prompts to name the pokemon
-        # pygame.draw.circle(self.screen, (30, 30, 30), (SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2), 150)
-        capture_text = sprites.SMALL_FONT.render("Name your pokemon!", True, "Black")
-        self.screen.blit(capture_text, (380, 400))
+        # Tests if that message is already on screen
+        if self.current_message != "Name your pokemon!":
+            # Prompts to name the pokemon
+            self.current_message = sprites.Message(
+                    "Name your pokemon!",
+                    (500, 600),
+                    (self.all_sprites, self.text)) 
         text_box.draw(self.screen)
 
     def log_pokemon(self, name, pokemon):
@@ -81,12 +95,15 @@ class Game:
         self.pokedex[name] = {"xp": pokemon.xp, "type": pokemon.name}
 
     def battle(self, pokemon_info):
+        """The battle screen between the player and the opponent"""
         self.player_pokemon = sprites.Pokemon(
                 pokemon_info[1]["type"],
                 (self.all_sprites, self.pokemon),
                 pokemon_info[0],
                 pokemon_info[1]["xp"]
                 )
+        if GOD_MODE:
+            self.player_pokemon.xp = 100000000000000
         # Randomly chooses a pokemon for the computer
         self.cp_pokemon = sprites.Pokemon(
                 random.choice(list(sprites.POKEMON.keys())),
@@ -104,6 +121,7 @@ class Game:
             self.p_turn = False
             self.messages.append(f"{self.cp_pokemon.name} goes first!")
 
+        # The input box for this screen, inactive by default
         text_box = sprites.InputBox((400, 300), 200, 50)
 
         running = True
@@ -116,6 +134,8 @@ class Game:
                     if inp is not None and inp not in self.pokedex and inp:
                         text_box.usable = False
                         self.log_pokemon(inp, self.cp_pokemon)
+                        # Releases the suspended message 
+                        self.current_message.release()
 
                 if event.type == KEYDOWN:
                     if event.key == K_ESCAPE:
@@ -202,11 +222,15 @@ class Game:
         sys.exit()
 
     def opening_screen(self, first_time):
+        """The screen for when the player plays for the first time or open
+        the game"""
         all_text = []
         if first_time:
             for index, pokemon in enumerate(
                     ("bulbasaur", "charmander", "squirtle")):
                 pos = (index * 400 + 100, 300)
+                # Creates button to return the corresponding pokemon name
+                # when pressed
                 sprites.ImageButton(
                         f"images/{pokemon}.png",
                         (225, 225),
@@ -222,11 +246,14 @@ class Game:
             for index, (name, pokemon) in enumerate(self.pokedex.items()):
                 pos_x = index * 150 + START_AMOUNT
                 if index > 5:
+                    # Wraps every 6 pokemon
                     pos_x = (index - 6) * 150 + START_AMOUNT
                     if index % 6 == 0:
                         # Increases y position to create a wrap effect
                         pos_y += 150
                 pos = (pos_x, pos_y)
+                # Creates button to return the name of the pokemon and the
+                # pokemon info when pressed
                 sprites.ImageButton(
                         f"images/{pokemon['type']}.png",
                         (100, 100),
