@@ -61,7 +61,7 @@ class Game:
                            text_col=(0, 0, 0),
                            groups=(self.all_sprites, self.buttons, self.move_buttons),
                            float_col="#ffd700",
-                           func=self.player_pokemon.use_move,
+                           func=self.player_pokemon.use_and_damage,
                            args=(move, self.cp_pokemon)
                            )
             self.p_turn = False
@@ -87,7 +87,6 @@ class Game:
                 pokemon_info[0],
                 pokemon_info[1]["xp"]
                 )
-        self.player_pokemon.xp = 300000000000000
         # Randomly chooses a pokemon for the computer
         self.cp_pokemon = sprites.Pokemon(
                 random.choice(list(sprites.POKEMON.keys())),
@@ -157,7 +156,9 @@ class Game:
                 self.player_turn()
             elif (not self.move_buttons and self.current_message.seen) and not text_box.usable:
                 # Computer turn
-                self.messages = self.cp_pokemon.use_move(self.cp_pokemon.moves[-1], self.player_pokemon)
+                move_result = self.cp_pokemon.choose_move(self.player_pokemon)
+                self.messages = move_result.messages
+                self.player_pokemon.take_damage(move_result.damage)
                 self.p_turn = True
                 if "fainted" in self.messages[-1]:
                     self.log_pokemon(self.player_pokemon.given_name, self.player_pokemon)

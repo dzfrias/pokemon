@@ -7,6 +7,7 @@ from pygame.sprite import Sprite
 from pygame.locals import K_RETURN
 from helper import Cooldown
 from config import SCREEN_WIDTH, SCREEN_HEIGHT
+from collections import namedtuple
 
 pygame.font.init()
 
@@ -307,21 +308,25 @@ class Pokemon(Sprite):
         name = self.given_name if self.given_name else self.name
         messages.insert(0, f"{name} used {move.name}!")
         messages.insert(1, f"Damage dealt: {int(damage)}")
-        if opponent.hp <= 0:
+        if opponent.hp - damage <= 0:
             messages.append(f"{opponent.name} fainted!")
         return damage, messages
 
-    def chose_move(self):
+    def choose_move(self, target):
+        MoveResult = namedtuple("MoveResult", "damage messages")
         big_damage = 0
         big_messages = ""
-        big_move = ""
-        moves = POKEMON[self.name]["Moves"]
-        for move in moves:
-            if self.use_move(move, self.player_pokemon.name)[0] > big_damage:
-                big_damage = self.use_move(move, self.player_pokemon.name)[0]
-                big_move = move
-                big_messages = self.use_move(move, self.player_pokemon.name)[0]
-        return big_damage, big_move, big_messages
+        for move in self.moves:
+            result = self.use_move(move, target)
+            if result[0] > big_damage:
+                big_damage = result[0]
+                big_messages = result[1]
+        return MoveResult(big_damage, big_messages)
+
+    def use_and_damage(self, move, opponent):
+        result = self.use_move(move, opponent)
+        opponent.take_damage(result[0])
+        return result[1]
 
 
 # Class to read in information from the move dictionary
