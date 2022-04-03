@@ -309,7 +309,7 @@ class Pokemon(Sprite):
         opponent.take_damage(damage)
         if opponent.hp <= 0:
             messages.append(f"{opponent.name} fainted!")
-        return messages
+        return damage, messages
 
 
 # Class to read in information from the move dictionary
