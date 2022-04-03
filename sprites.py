@@ -306,7 +306,6 @@ class Pokemon(Sprite):
             0)
         messages.insert(0, f"{self.name} used {move.name}!")
         messages.insert(1, f"Damage dealt: {int(damage)}")
-        opponent.take_damage(damage)
         if opponent.hp <= 0:
             messages.append(f"{opponent.name} fainted!")
         return damage, messages
