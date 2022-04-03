@@ -310,6 +310,18 @@ class Pokemon(Sprite):
             messages.append(f"{opponent.name} fainted!")
         return damage, messages
 
+    def chose_move(self):
+        big_damage = 0
+        big_messages = ""
+        big_move = ""
+        moves = POKEMON[self.name]["Moves"]
+        for move in moves:
+            if self.use_move(move, self.player_pokemon.name)[0] > big_damage:
+                big_damage = self.use_move(move, self.player_pokemon.name)[0]
+                big_move = move
+                big_messages = self.use_move(move, self.player_pokemon.name)[0]
+        return big_damage, big_move, big_messages
+
 
 # Class to read in information from the move dictionary
 class Move:
