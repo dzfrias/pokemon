@@ -37,6 +37,8 @@ class Game:
         with open("pokemon.json") as f:
             self.pokedex = json.load(f)
         self.button_background = None
+        self.pokeball_image = pygame.image.load("images/pokeball.png").convert_alpha()
+        self.pokeball_image = pygame.transform.scale(self.pokeball_image, (350, 350))
 
     def player_turn(self):
         # Get the appropriate button spread depending on the amount of moves
@@ -65,6 +67,15 @@ class Game:
             self.p_turn = False
         self.button_background = sprites.RisingBox(600)
 
+    def draw_capture(self, text_box):
+        pokeball_pos = (SCREEN_WIDTH / 2 - 175, SCREEN_HEIGHT / 2 - 175)
+        self.screen.blit(self.pokeball_image, pokeball_pos)
+        # Prompts to name the pokemon
+        # pygame.draw.circle(self.screen, (30, 30, 30), (SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2), 150)
+        capture_text = sprites.SMALL_FONT.render("Name your pokemon!", True, "Black")
+        self.screen.blit(capture_text, (380, 400))
+        text_box.draw(self.screen)
+
     def log_pokemon(self, name, pokemon):
         """Log pokemon into pokedex"""
         self.pokedex[name] = {"xp": pokemon.xp, "type": pokemon.name}
@@ -76,6 +87,7 @@ class Game:
                 pokemon_info[0],
                 pokemon_info[1]["xp"]
                 )
+        self.player_pokemon.xp = 300000000000000
         # Randomly chooses a pokemon for the computer
         self.cp_pokemon = sprites.Pokemon(
                 random.choice(list(sprites.POKEMON.keys())),
@@ -176,11 +188,7 @@ class Game:
                 pokemon.draw_bar()
                 pokemon.particles.update()
             if text_box.usable:
-                # Prompts to name the pokemon
-                pygame.draw.circle(self.screen, (30, 30, 30), (SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2), 150)
-                capture_text = sprites.SMALL_FONT.render("Name your pokemon!", True, "White")
-                self.screen.blit(capture_text, (380, 400))
-                text_box.draw(self.screen)
+                self.draw_capture(text_box)
 
             pygame.display.flip()
             self.clock.tick(60)

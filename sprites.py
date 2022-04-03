@@ -304,7 +304,8 @@ class Pokemon(Sprite):
             ((((((2 * self.level()) / 5) + 2) * move.power * (
                         self.attack / opponent.defense)) / 50) * modifier),
             0)
-        messages.insert(0, f"{self.name} used {move.name}!")
+        name = self.given_name if self.given_name else self.name
+        messages.insert(0, f"{name} used {move.name}!")
         messages.insert(1, f"Damage dealt: {int(damage)}")
         opponent.take_damage(damage)
         if opponent.hp <= 0:
