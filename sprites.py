@@ -3,9 +3,10 @@ import math
 import random
 import pygame
 from pygame import Surface
-from pygame.sprite import Sprite, Group
+from pygame.sprite import Sprite
 from pygame.locals import K_RETURN
 from helper import Cooldown
+from config import SCREEN_WIDTH, SCREEN_HEIGHT
 
 pygame.font.init()
 
@@ -160,11 +161,13 @@ class Message(Sprite):
     def __init__(self, text, pos, groups):
         super().__init__(*groups)
         self.seen = False
-        self.surf = FONT.render(text, True, "White")
+        self.surf = FONT.render(text, True, "Black")
         self.rect = self.surf.get_rect(center=pos)
         self.text = text
         # Timer for when the message can be advanced
         self.timer = 40
+        self.bar_rect = pygame.Rect(0, pos[0] + 80, 0, 50)
+        self.bar_vel = 2
 
     def update(self, pressed):
         # Gets the integer value for if the enter key is pressed
@@ -175,6 +178,13 @@ class Message(Sprite):
             self.seen = True
         if self.timer > 0:
             self.timer -= 1
+        if self.bar_rect.w < SCREEN_WIDTH:
+            self.bar_rect.w += self.bar_vel
+            self.bar_vel += 2.5
+
+    def draw_bar(self, screen):
+        pygame.draw.rect(screen, "Black", self.bar_rect.inflate(5, 4), 5)
+        pygame.draw.rect(screen, (225, 225, 225), self.bar_rect)
 
     def __repr__(self):
         return f"{self.__class__.__name__}({self.text}, pos={self.rect.center})"
@@ -329,7 +339,7 @@ class Slash(Sprite):
             else:
                 surf.set_alpha(0)
         # Draws the ellipse on the surface
-        pygame.draw.ellipse(surf, (255, 255, 0), (0, 0, *rect.size))
+        pygame.draw.ellipse(surf, "Red", (0, 0, *rect.size))
         # Rotate the surface based on the angle
         rotate_surf = pygame.transform.rotate(surf, self.angle)
         self.screen.blit(rotate_surf, rotate_surf.get_rect(center=rect.center))
@@ -379,3 +389,18 @@ class InputBox:
         screen.blit(self.txt_surface, (self.rect.x+5, self.rect.y+5))
         # Blit the rect.
         pygame.draw.rect(screen, self.color, self.rect, 2)
+
+
+class RisingBox:
+    def __init__(self, height_max):
+        self.rect = pygame.Rect(0, SCREEN_HEIGHT, SCREEN_WIDTH, 500)
+        self.increase = 1
+        self.max = height_max
+
+    def draw(self, screen):
+        pygame.draw.rect(screen, (225, 225, 225), self.rect)
+        pygame.draw.rect(screen, "Black", self.rect.inflate(20, 20), 10)
+        if self.rect.top > self.max:
+            self.rect.centery -= self.increase
+            self.increase += 1.5
+

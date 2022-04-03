@@ -36,6 +36,7 @@ class Game:
         self.background = pygame.transform.scale(self.background, [1000, 750])
         with open("pokemon.json") as f:
             self.pokedex = json.load(f)
+        self.button_background = None
 
     def player_turn(self):
         # Get the appropriate button spread depending on the amount of moves
@@ -54,7 +55,7 @@ class Game:
             pos = (index * spread + start, 650)
             sprites.Button(move.name,
                            pos=pos,
-                           color=(208, 202, 208),
+                           color=(198, 192, 198),
                            text_col=(0, 0, 0),
                            groups=(self.all_sprites, self.buttons, self.move_buttons),
                            float_col="#ffd700",
@@ -62,6 +63,7 @@ class Game:
                            args=(move, self.cp_pokemon)
                            )
             self.p_turn = False
+        self.button_background = sprites.RisingBox(600)
 
     def log_pokemon(self, name, pokemon):
         """Log pokemon into pokedex"""
@@ -100,7 +102,7 @@ class Game:
             for event in pygame.event.get():
                 if text_box.usable:
                     inp = text_box.handle_event(event)
-                    if inp is not None and inp not in self.pokedex:
+                    if inp is not None and inp not in self.pokedex and inp:
                         text_box.usable = False
                         self.log_pokemon(inp, self.cp_pokemon)
 
@@ -155,6 +157,10 @@ class Game:
                 text_box.update()
 
             self.screen.blit(self.background, (0, 0))
+            if self.move_buttons:
+                self.button_background.draw(self.screen)
+            if self.current_message is not None and not self.current_message.seen:
+                self.current_message.draw_bar(self.screen)
             for sprite in self.all_sprites:
                 self.screen.blit(sprite.surf, sprite.rect)
             # Puts button text on the screen
@@ -163,9 +169,8 @@ class Game:
                 if not text_box.usable:
                     button.handle_float(collide)
                 self.screen.blit(button.text, button.get_text_pos())
-            for pokemon in (self.player_pokemon, self.cp_pokemon):
+            for pokemon in self.pokemon:
                 pokemon.draw_bar()
-            for pokemon in (self.player_pokemon, self.cp_pokemon):
                 pokemon.particles.update()
             if text_box.usable:
                 # Prompts to name the pokemon
@@ -187,7 +192,8 @@ class Game:
     def opening_screen(self, first_time):
         all_text = []
         if first_time:
-            for index, pokemon in enumerate(("bulbasaur", "charmander", "squirtle")):
+            for index, pokemon in enumerate(
+                    ("bulbasaur", "charmander", "squirtle")):
                 pos = (index * 400 + 100, 300)
                 sprites.ImageButton(
                         f"images/{pokemon}.png",
@@ -232,7 +238,7 @@ class Game:
             for event in pygame.event.get():
                 if text_box.usable:
                     inp = text_box.handle_event(event)
-                    if inp is not None:
+                    if inp is not None and inp:
                         # Tests if the user enters their text
                         text_box.usable = False
                         running = False
