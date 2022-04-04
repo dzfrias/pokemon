@@ -353,10 +353,11 @@ class Pokemon(Sprite):
                         self.attack / opponent.defense)) / 50) * modifier),
             0)
         name = self.given_name if self.given_name else self.name
+        opponent_name = opponent.given_name if opponent.given_name else opponent.name
         messages.insert(0, f"{name} used {move.name}!")
         messages.insert(1, f"Damage dealt: {int(damage)}")
         if opponent.hp - damage <= 0:
-            messages.append(f"{opponent.name} fainted!")
+            messages.append(f"{opponent_name} fainted!")
         return damage, messages
 
     def choose_move(self, target):

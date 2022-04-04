@@ -43,6 +43,8 @@ class Game:
         self.button_background = None
         self.pokeball_image = pygame.image.load("images/pokeball.png").convert_alpha()
         self.pokeball_image = pygame.transform.scale(self.pokeball_image, (350, 350))
+        self.belt = []
+        self.belt_iter = iter(self.belt)
 
         with open("type_colors.json") as f:
             self.TYPE_COLORS = json.load(f)
@@ -97,14 +99,29 @@ class Game:
         """Log pokemon into pokedex"""
         self.pokedex[name] = {"xp": pokemon.xp, "type": pokemon.name}
 
-    def battle(self, pokemon_info):
+    def replace_pokemon(self):
+        self.player_pokemon.kill()
+        self.player_pokemon = next(self.belt_iter)
+        self.player_pokemon.add(self.all_sprites, self.pokemon)
+        self.player_pokemon.rect.center = (150, 500)
+
+    def battle(self, unformed_belt):
         """The battle screen between the player and the opponent"""
-        self.player_pokemon = sprites.Pokemon(
-                pokemon_info[1]["type"],
-                (self.all_sprites, self.pokemon),
-                pokemon_info[0],
-                pokemon_info[1]["xp"]
-                )
+        self.belt = [sprites.Pokemon(
+            pokemon_info[1]["type"],
+            (),
+            pokemon_info[0],
+            pokemon_info[1]["xp"]
+            ) for pokemon_info in unformed_belt]
+        self.belt_iter = iter(self.belt)
+        self.player_pokemon = next(self.belt_iter)
+        self.player_pokemon.add(self.all_sprites, self.pokemon)
+        # self.player_pokemon = sprites.Pokemon(
+        #         pokemon_info[1]["type"],
+        #         (self.all_sprites, self.pokemon),
+        #         pokemon_info[0],
+        #         pokemon_info[1]["xp"]
+        #         )
         if GOD_MODE:
             self.player_pokemon.xp = 100000000000000
         # Randomly chooses a pokemon for the computer
@@ -171,6 +188,10 @@ class Game:
                             self.messages.pop(0),
                             (500, 600),
                             (self.all_sprites, self.text))
+                    if "has entered the field" in self.current_message.text:
+                        # Replaces the pokemon after the replace message is
+                        # displayed
+                        self.replace_pokemon()
                 except IndexError:
                     # Excepts when there are no messages
                     sprites.Message.reuse = False
@@ -185,7 +206,9 @@ class Game:
                 self.p_turn = True
                 if "fainted" in self.messages[-1]:
                     self.log_pokemon(self.player_pokemon.given_name, self.player_pokemon)
-                    print("Player lost!")
+                    # Puts the replace message at the end of the list so it
+                    # can be seen by the message system
+                    self.messages.append(f"{self.player_pokemon.given_name} has entered the field!")
 
             pressed = pygame.key.get_pressed()
             self.buttons.update()
@@ -250,7 +273,7 @@ class Game:
                 pos_x = index * 150 + START_AMOUNT
                 if index > 5:
                     # Wraps every 6 pokemon
-                    pos_x = (index - 6) * 150 + START_AMOUNT
+                    pos_x = (index - (6 * index // 6)) * 150 + START_AMOUNT
                     if index % 6 == 0:
                         # Increases y position to create a wrap effect
                         pos_y += 150
@@ -271,6 +294,7 @@ class Game:
 
         # Textbox is only usable in this screen when first_time is true
         text_box = sprites.InputBox((400, 500), 200, 60)
+        temp_belt = []
 
         text = sprites.FONT.render(open_text, True, (225, 225, 225))
         running = True
@@ -317,8 +341,10 @@ class Game:
                                         if button2 is not button:
                                             button2.kill()
                                 else:
-                                    # Otherwise, quits the loop
-                                    running = False
+                                    temp_belt.append(pokemon)
+                                    button.disable()
+                                    if len(temp_belt) == 3:
+                                        running = False
 
             if text_box.usable:
                 text_box.update()
@@ -349,7 +375,7 @@ class Game:
             # If the pokemon just has it's type filled out because first_time
             # is true, the rest of the pokemon will be filled out for battle()
             pokemon = (inp, {"xp": None, "type": pokemon})
-        self.battle(pokemon)
+        self.battle(temp_belt)
 
 
 if __name__ == "__main__":
