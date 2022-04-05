@@ -12,6 +12,7 @@ import json
 from os.path import getsize
 
 GOD_MODE = False
+WEAK_MODE = True
 
 
 class Game:
@@ -116,12 +117,6 @@ class Game:
         self.belt_iter = iter(self.belt)
         self.player_pokemon = next(self.belt_iter)
         self.player_pokemon.add(self.all_sprites, self.pokemon)
-        # self.player_pokemon = sprites.Pokemon(
-        #         pokemon_info[1]["type"],
-        #         (self.all_sprites, self.pokemon),
-        #         pokemon_info[0],
-        #         pokemon_info[1]["xp"]
-        #         )
         if GOD_MODE:
             self.player_pokemon.xp = 100000000000000
         # Randomly chooses a pokemon for the computer
@@ -132,6 +127,9 @@ class Game:
         # Puts both pokemon into set positions
         self.player_pokemon.rect.center = (150, 500)
         self.cp_pokemon.rect.center = (800, 375)
+        if WEAK_MODE:
+            for pokemon in self.belt:
+                pokemon.hp = 1
 
         if self.player_pokemon.speed > self.cp_pokemon.speed:
             self.p_turn = True
@@ -143,6 +141,8 @@ class Game:
 
         # The input box for this screen, inactive by default
         text_box = sprites.InputBox((400, 290), 200, 50)
+        pygame.mixer.music.load("audio/battle_music.wav")
+        pygame.mixer.music.play(-1)
 
         running = True
         while running:
@@ -326,6 +326,8 @@ class Game:
                             if button.collide(mouse_pos):
                                 # Gets the selected pokemon the ImageButton
                                 pokemon = button.activate()
+                                if pokemon is None:
+                                    continue
                                 try:
                                     # If first time is true, the button
                                     # will only return the pokemon's type
@@ -340,10 +342,11 @@ class Game:
                                     for button2 in self.buttons:
                                         if button2 is not button:
                                             button2.kill()
+                                    temp_belt.append(pokemon)
                                 else:
                                     temp_belt.append(pokemon)
                                     button.disable()
-                                    if len(temp_belt) == 3:
+                                    if len(temp_belt) == 3 or len(temp_belt) == len(self.buttons):
                                         running = False
 
             if text_box.usable:
@@ -371,10 +374,11 @@ class Game:
 
         for sprite in self.all_sprites:
             sprite.kill()
-        if isinstance(pokemon, str):
+        if isinstance(temp_belt[0], str):
             # If the pokemon just has it's type filled out because first_time
             # is true, the rest of the pokemon will be filled out for battle()
-            pokemon = (inp, {"xp": None, "type": pokemon})
+            pokemon = (inp, {"xp": None, "type": temp_belt[0]})
+            temp_belt[0] = pokemon
         self.battle(temp_belt)
 
 

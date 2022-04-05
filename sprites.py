@@ -158,7 +158,9 @@ class ImageButton(Button):
 
     def activate(self):
         """Returns the value assigned"""
-        return self.return_val
+        if self.enabled:
+            return self.return_val
+        return None
 
     def get_text_pos(self):
         """Not implemented for this subclass"""
