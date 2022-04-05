@@ -347,12 +347,13 @@ class Pokemon(Sprite):
         # Draws white border around health bar
         pygame.draw.rect(screen, "White", (*pos, self.bar_len, 25), 4)
 
-    def take_damage(self, amount):
+    def take_damage(self, amount, sound):
         """Subtracts from hp, creates a Slash particle effect, and starts
         a timer to make an x_offset of the position for some time"""
         self.hp -= amount
         Slash(self.rect.center, 300, (self.particles,))
         self.hit_timer.reset()
+        sound.play()
 
     def use_move(self, move, opponent):
         """Uses specified move on opponent"""
@@ -415,14 +416,13 @@ class Pokemon(Sprite):
                 big_messages = result[1]
         return MoveResult(big_damage, big_messages)
 
-    def use_and_damage(self, move, opponent):
+    def use_and_damage(self, move, opponent, sound):
         """Calculates the damage of a move and applies it to the target"""
         result = self.use_move(move, opponent)
-        opponent.take_damage(result[0])
+        opponent.take_damage(result[0], sound)
         return result[1]
 
 
-# Class to read in information from the move dictionary
 class Move:
     """Holds information for a pokemon's move"""
 

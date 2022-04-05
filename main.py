@@ -54,6 +54,10 @@ class Game:
         with open("type_colors.json") as f:
             self.TYPE_COLORS = json.load(f)
 
+        # -Sound-
+        pygame.mixer.init()
+        self.hit_sound = pygame.mixer.Sound("audio/hit_effect.wav")
+
     def player_turn(self):
         """Creates the player UI when taking their turn"""
         # Get the appropriate button spread depending on the amount of moves
@@ -82,7 +86,7 @@ class Game:
                                self.move_buttons),
                            float_col=self.TYPE_COLORS[move.move_type],
                            func=self.player_pokemon.use_and_damage,
-                           args=(move, self.cp_pokemon)
+                           args=(move, self.cp_pokemon, self.hit_sound)
                            )
             self.p_turn = False
         self.button_background = sprites.RisingBox(600)
@@ -105,13 +109,9 @@ class Game:
         self.pokedex[name] = {"xp": pokemon.xp, "type": pokemon.name}
 
     def replace_pokemon(self):
+        """Replaces the current pokemon with next in line"""
         self.player_pokemon.kill()
-        try:
-            self.player_pokemon = next(self.belt_iter)
-        except StopIteration:
-            # Losing goes here!
-            self.messages.append("You're out of pokemon! You lose!")
-            self.lost = True
+        self.player_pokemon = next(self.belt_iter)
         self.player_pokemon.add(self.all_sprites, self.pokemon)
         self.player_pokemon.rect.center = (150, 500)
 
@@ -155,8 +155,10 @@ class Game:
 
         # The input box for this screen, inactive by default
         text_box = sprites.InputBox((400, 290), 200, 50)
+        # Starts the music
         pygame.mixer.music.load("audio/battle_music.wav")
-        pygame.mixer.music.play(-1)
+        pygame.mixer.music.play(-1)  # -1 here plays the music infinitely
+        pygame.mixer.music.set_volume(0.2)
 
         running = True
         while running:
@@ -235,7 +237,9 @@ class Game:
                 # Computer turn
                 move_result = self.cp_pokemon.choose_move(self.player_pokemon)
                 self.messages = move_result.messages
-                self.player_pokemon.take_damage(move_result.damage)
+                self.player_pokemon.take_damage(
+                        move_result.damage,
+                        self.hit_sound)
                 self.p_turn = True
                 if "fainted" in self.messages[-1]:
                     self.log_pokemon(
@@ -247,6 +251,7 @@ class Game:
                         next_pokemon = self.belt[self.belt.index(self.player_pokemon) + 1].given_name
                         self.messages.append(f"{next_pokemon} has entered the field!")
                     except IndexError:
+                        # The player loses because they have no more pokemon
                         self.messages.append(
                                 "You're out of pokemon! You lose!")
                         self.lost = True
