@@ -163,12 +163,13 @@ class Game:
             for event in pygame.event.get():
                 if text_box.usable:
                     inp = text_box.handle_event(event)
-                    if inp is not None and inp not in self.pokedex and inp and text_box.typed:
+                    if inp is not None and inp not in self.pokedex and inp and text_box.typed and inp != self.player_pokemon.given_name:
                         text_box.usable = False
                         self.log_pokemon(inp, self.cp_pokemon)
                         # Releases the suspended message
                         self.current_message.release()
-                    elif inp in self.pokedex:
+                        running = False
+                    elif inp in self.pokedex or inp == self.player_pokemon.name:
                         sprites.ErrorMessage.default(
                                 "Pokemon names must be unique!",
                                 (self.error_message,)
@@ -176,10 +177,14 @@ class Game:
 
                 if event.type == KEYDOWN:
                     if event.key == K_ESCAPE:
-                        running = False
+                        pygame.quit()
+                        pygame.display.quit()
+                        sys.exit()
 
                 elif event.type == QUIT:
-                    running = False
+                    pygame.quit()
+                    pygame.display.quit()
+                    sys.exit()
 
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     # Checks if left click is used
@@ -228,6 +233,8 @@ class Game:
                     # can be seen by the message system
                     self.messages.append(f"{self.player_pokemon.given_name} has entered the field!")
 
+            if self.lost:
+                break
             pressed = pygame.key.get_pressed()
             self.buttons.update()
             # Messages need the enter key to be pressed in order to be seen
@@ -266,9 +273,6 @@ class Game:
         self.log_pokemon(self.player_pokemon.given_name, self.player_pokemon)
         with open("pokemon.json", "w") as f:
             json.dump(self.pokedex, f, indent=4)
-        pygame.quit()
-        pygame.display.quit()
-        sys.exit()
 
     def opening_screen(self, first_time):
         """The screen for when the player plays for the first time or open
@@ -296,7 +300,7 @@ class Game:
                 pos_x = index * 150 + START_AMOUNT
                 if index > 5:
                     # Wraps every 6 pokemon
-                    pos_x = (index - (6 * index // 6)) * 150 + START_AMOUNT
+                    pos_x = (index - (6 * (index // 6))) * 150 + START_AMOUNT
                     if index % 6 == 0:
                         # Increases y position to create a wrap effect
                         pos_y += 150
@@ -411,5 +415,8 @@ if __name__ == "__main__":
         Game().opening_screen(True)
     else:
         # Pokemon select screen here
+        Game().opening_screen(False)
+    while True:
+        print("HI")
         Game().opening_screen(False)
 

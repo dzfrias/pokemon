@@ -216,8 +216,6 @@ class Message(Sprite):
             self.kill()
             # Marks as seen so the main loop can advance
             self.seen = True
-            if "You're out of pokemon! You lose!" in self.text:
-                raise Exception
         if self.timer > 0:
             self.timer -= 1
         if self.bar_rect.w < SCREEN_WIDTH:
