@@ -236,9 +236,12 @@ class Game:
                 self.p_turn = True
                 if "fainted" in self.messages[-1]:
                     self.log_pokemon(self.player_pokemon.given_name, self.player_pokemon)
-                    # Puts the replace message at the end of the list so it
+                    # Puts the replacement message at the end of the list, so it
                     # can be seen by the message system
-                    self.messages.append(f"{self.player_pokemon.given_name} has entered the field!")
+                    try:
+                        self.messages.append(f"{self.belt[self.belt.index(self.player_pokemon) + 1].given_name} has entered the field!")
+                    except IndexError:
+                        pass
 
             if self.lost and self.current_message.seen:
                 break
@@ -409,7 +412,7 @@ class Game:
         for sprite in self.all_sprites:
             sprite.kill()
         if isinstance(temp_belt[0], str):
-            # If the pokemon just has it's type filled out because first_time
+            # If the pokemon just has its type filled out because first_time
             # is true, the rest of the pokemon will be filled out for battle()
             pokemon = (inp, {"xp": None, "type": temp_belt[0]})
             temp_belt[0] = pokemon
