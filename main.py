@@ -12,8 +12,7 @@ import json
 from os.path import getsize
 
 GOD_MODE = False
-WEAK_MODE = True
-
+WEAK_MODE = False
 
 
 class Game:
@@ -212,7 +211,8 @@ class Game:
                                             self.cp_pokemon.xp // 4)
 
             # -Turn Order-
-            if (self.current_message is None or self.current_message.seen) and not text_box.usable:
+            if (self.current_message is None or self.current_message.seen) and (
+                    not text_box.usable):
                 try:
                     # Turns sets the current message
                     self.current_message = sprites.Message(
@@ -226,26 +226,32 @@ class Game:
                 except IndexError:
                     # Excepts when there are no messages
                     sprites.Message.reuse = False
-            if self.p_turn and not self.move_buttons and self.current_message.seen:
-                # Only starts a new player turn when the current message is seen
+            if self.p_turn and not self.move_buttons and (
+                    self.current_message.seen):
+                # Only starts a new player turn when current message is seen
                 self.player_turn()
-            elif (not self.move_buttons and self.current_message.seen) and not text_box.usable:
+            elif (not self.move_buttons and self.current_message.seen) and (
+                    not text_box.usable):
                 # Computer turn
                 move_result = self.cp_pokemon.choose_move(self.player_pokemon)
                 self.messages = move_result.messages
                 self.player_pokemon.take_damage(move_result.damage)
                 self.p_turn = True
                 if "fainted" in self.messages[-1]:
-                    self.log_pokemon(self.player_pokemon.given_name, self.player_pokemon)
-                    # Puts the replacement message at the end of the list, so it
-                    # can be seen by the message system
+                    self.log_pokemon(
+                            self.player_pokemon.given_name, self.player_pokemon
+                            )
+                    # Puts the replacement message at the end of the list,
+                    # so it can be seen by the message system
                     try:
                         next_pokemon = self.belt[self.belt.index(self.player_pokemon) + 1].given_name
                         self.messages.append(f"{next_pokemon} has entered the field!")
                     except IndexError:
-                        pass
+                        self.messages.append(
+                                "You're out of pokemon! You lose!")
+                        self.lost = True
 
-            if self.lost:
+            if self.lost and self.current_message.text == "You're out of pokemon! You lose!" and self.current_message.seen:
                 break
             pressed = pygame.key.get_pressed()
             self.buttons.update()
@@ -258,7 +264,8 @@ class Game:
             self.screen.blit(self.background, (0, 0))
             if self.move_buttons:
                 self.button_background.draw(self.screen)
-            if self.current_message is not None and not self.current_message.seen:
+            if self.current_message is not None and (
+                    not self.current_message.seen):
                 self.current_message.draw_bar(self.screen)
             for sprite in self.all_sprites:
                 self.screen.blit(sprite.surf, sprite.rect)
@@ -328,7 +335,8 @@ class Game:
                         return_=(name, pokemon)
                         )
                 # Centers the text a little more to the image
-                all_text.append(sprites.TextSurf(name, (pos[0] - 45, pos[1] + 45)))
+                all_text.append(
+                        sprites.TextSurf(name, (pos[0] - 45, pos[1] + 45)))
             open_text = "Choose up to three pokemon!"
 
         # Textbox is only usable in this screen when first_time is true
@@ -385,7 +393,9 @@ class Game:
                                 else:
                                     temp_belt.append(pokemon)
                                     button.disable()
-                                    if len(temp_belt) == 3 or len(temp_belt) == len(self.buttons):
+                                    if len(temp_belt) == 3 or (
+                                            len(temp_belt) == len(self.buttons)
+                                            ):
                                         running = False
 
             if text_box.usable:

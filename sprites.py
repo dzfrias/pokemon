@@ -77,7 +77,8 @@ class Button(Sprite):
 
     def collide(self, point):
         """Check if one of the two hitboxes are collided with"""
-        return self.rect.collidepoint(point) or self.touch_box.collidepoint(point)
+        return self.rect.collidepoint(point) or (
+                self.touch_box.collidepoint(point))
 
     def handle_float(self, collide):
         """Float if collided with"""
@@ -243,7 +244,7 @@ class Message(Sprite):
         return self.text != other
 
     def __repr__(self):
-        return f"{self.__class__.__name__}({self.text}, pos={self.rect.center})"
+        return f"{self.__class__.__name__}({self.text}, {self.rect.center})"
 
 
 class ErrorMessage(Message):
@@ -296,7 +297,8 @@ class Pokemon(Sprite):
         self.given_name = given_name
 
         # -Pygame Stuff-
-        self.surf = pygame.image.load(f"images/{self.name.lower()}.png").convert_alpha()
+        self.surf = pygame.image.load(
+                f"images/{self.name.lower()}.png").convert_alpha()
         self.surf = pygame.transform.scale(self.surf, [150, 150])
         self.rect = self.surf.get_rect()
         self.particles = pygame.sprite.Group()
@@ -369,14 +371,17 @@ class Pokemon(Sprite):
         # Code to calculate the effectiveness of the attack
 
         # Super effective
-        for index, effective in enumerate((move.super_effective, move.not_effective)):
+        for index, effective in enumerate(
+                (move.super_effective, move.not_effective)):
             for i in effective:
                 if i in opponent.type and index == 0:
                     type_modifier *= 2
-                    messages.append("Super effective!")
+                    if "Super effective!" not in messages:
+                        messages.append("Super effective!")
                 elif i in opponent.type and index == 1:
                     type_modifier /= 2
-                    messages.append("Not very effective...")
+                    if "Not very effective..." not in messages:
+                        messages.append("Not very effective...")
 
         # Calculates the modifier
         modifier = critical * rand_modifier * type_modifier
@@ -391,6 +396,11 @@ class Pokemon(Sprite):
         messages.insert(1, f"Damage dealt: {int(damage)}")
         if opponent.hp - damage <= 0:
             messages.append(f"{opponent_name} fainted!")
+        if "Super effective!" in messages and (
+                "Not very effective..." in messages):
+            # Cancels the messages out if they're both in messages
+            messages.remove("Super effective!")
+            messages.remove("Not very effective...")
         return damage, messages
 
     def choose_move(self, target):
