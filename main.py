@@ -11,8 +11,8 @@ import random
 import json
 from os.path import getsize
 
-GOD_MODE = True
-WEAK_MODE = False
+GOD_MODE = False
+WEAK_MODE = True
 
 
 class Game:
@@ -43,8 +43,10 @@ class Game:
         with open("pokemon.json") as f:
             self.pokedex = json.load(f)
         self.button_background = None
-        self.pokeball_image = pygame.image.load("images/pokeball.png").convert_alpha()
-        self.pokeball_image = pygame.transform.scale(self.pokeball_image, (350, 350))
+        self.pokeball_image = pygame.image.load(
+                "images/pokeball.png").convert_alpha()
+        self.pokeball_image = pygame.transform.scale(
+                self.pokeball_image, (350, 350))
         self.belt = []
         self.belt_iter = iter(self.belt)
         self.lost = False
@@ -163,13 +165,17 @@ class Game:
             for event in pygame.event.get():
                 if text_box.usable:
                     inp = text_box.handle_event(event)
-                    if inp is not None and inp not in self.pokedex and inp and text_box.typed and inp != self.player_pokemon.given_name:
+                    if inp is not None and (
+                            inp not in self.pokedex and inp and (
+                                text_box.typed and (
+                                    inp != self.player_pokemon.given_name))):
                         text_box.usable = False
                         self.log_pokemon(inp, self.cp_pokemon)
                         # Releases the suspended message
                         self.current_message.release()
                         running = False
-                    elif inp in self.pokedex or inp == self.player_pokemon.name:
+                    elif inp in self.pokedex or (
+                            inp == self.player_pokemon.name):
                         sprites.ErrorMessage.default(
                                 "Pokemon names must be unique!",
                                 (self.error_message,)
@@ -201,7 +207,8 @@ class Game:
                                     # Gives prompt to name pokemon, as a
                                     # defeated pokemon is a captured one
                                     text_box.usable = True
-                                    self.player_pokemon.xp += self.cp_pokemon.xp // 4
+                                    self.player_pokemon.xp += (
+                                            self.cp_pokemon.xp // 4)
 
             # -Turn Order-
             if (self.current_message is None or self.current_message.seen) and not text_box.usable:
@@ -417,6 +424,5 @@ if __name__ == "__main__":
         # Pokemon select screen here
         Game().opening_screen(False)
     while True:
-        print("HI")
         Game().opening_screen(False)
 
