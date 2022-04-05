@@ -11,8 +11,8 @@ import random
 import json
 from os.path import getsize
 
-GOD_MODE = False
-WEAK_MODE = True
+GOD_MODE = True
+WEAK_MODE = False
 
 
 class Game:
@@ -31,6 +31,7 @@ class Game:
         self.move_buttons = pygame.sprite.Group()
         self.text = pygame.sprite.Group()
         self.pokemon = pygame.sprite.Group()
+        self.error_message = pygame.sprite.GroupSingle()
 
         # -Game stuff-
         self.player_pokemon = None
@@ -162,11 +163,16 @@ class Game:
             for event in pygame.event.get():
                 if text_box.usable:
                     inp = text_box.handle_event(event)
-                    if inp is not None and inp not in self.pokedex and inp:
+                    if inp is not None and inp not in self.pokedex and inp and text_box.typed:
                         text_box.usable = False
                         self.log_pokemon(inp, self.cp_pokemon)
                         # Releases the suspended message
                         self.current_message.release()
+                    elif inp in self.pokedex:
+                        sprites.ErrorMessage.default(
+                                "Pokemon names must be unique!",
+                                (self.error_message,)
+                                )
 
                 if event.type == KEYDOWN:
                     if event.key == K_ESCAPE:
@@ -190,7 +196,7 @@ class Game:
                                     # Gives prompt to name pokemon, as a
                                     # defeated pokemon is a captured one
                                     text_box.usable = True
-                                    self.player_pokemon += self.cp_pokemon.xp // 4
+                                    self.player_pokemon.xp += self.cp_pokemon.xp // 4
 
             # -Turn Order-
             if (self.current_message is None or self.current_message.seen) and not text_box.usable:
@@ -248,6 +254,11 @@ class Game:
                 pokemon.particles.update()
             if text_box.usable:
                 self.draw_capture(text_box)
+            try:
+                self.error_message.sprite.update()
+                self.error_message.sprite.draw(self.screen)
+            except AttributeError:
+                pass
 
             pygame.display.flip()
             self.clock.tick(60)
@@ -302,7 +313,7 @@ class Game:
                         )
                 # Centers the text a little more to the image
                 all_text.append(sprites.TextSurf(name, (pos[0] - 45, pos[1] + 45)))
-            open_text = "Choose your pokemon!"
+            open_text = "Choose up to three pokemon!"
 
         # Textbox is only usable in this screen when first_time is true
         text_box = sprites.InputBox((400, 500), 200, 60)

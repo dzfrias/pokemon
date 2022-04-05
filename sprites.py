@@ -249,7 +249,28 @@ class Message(Sprite):
 
 
 class ErrorMessage(Message):
-    pass
+    def __init__(self, text, pos, groups):
+        super().__init__(text, pos, groups)
+        self.surf = FONT.render(text, True, "Red")
+        self.timer = 45
+
+    def update(self):
+        if not self.timer:
+            self.kill()
+            self.seen = True
+        self.timer -= 1
+
+    def draw(self, screen):
+        pygame.draw.circle(
+                screen,
+                (30, 30, 30),
+                self.rect.center,
+                self.rect.w / 2 + 5)
+        screen.blit(self.surf, self.rect)
+
+    @classmethod
+    def default(cls, text, groups):
+        return cls(text, (500, 100), groups)
 
 
 class Pokemon(Sprite):
