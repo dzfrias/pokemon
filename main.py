@@ -240,7 +240,7 @@ class Game:
                     # can be seen by the message system
                     self.messages.append(f"{self.player_pokemon.given_name} has entered the field!")
 
-            if self.lost:
+            if self.lost and self.current_message.seen:
                 break
             pressed = pygame.key.get_pressed()
             self.buttons.update()
