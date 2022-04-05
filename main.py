@@ -15,6 +15,7 @@ GOD_MODE = False
 WEAK_MODE = True
 
 
+
 class Game:
     """Manages the event loops of the game"""
 
@@ -244,7 +245,8 @@ class Game:
                     # Puts the replacement message at the end of the list,
                     # so it can be seen by the message system
                     try:
-                        self.messages.append(f"{self.belt[self.belt.index(self.player_pokemon) + 1].given_name} has entered the field!")
+                        next_pokemon = self.belt[self.belt.index(self.player_pokemon) + 1].given_name
+                        self.messages.append(f"{next_pokemon} has entered the field!")
                     except IndexError:
                         self.messages.append(
                                 "You're out of pokemon! You lose!")
