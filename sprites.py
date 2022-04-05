@@ -376,10 +376,12 @@ class Pokemon(Sprite):
             for i in effective:
                 if i in opponent.type and index == 0:
                     type_modifier *= 2
-                    messages.append("Super effective!")
+                    if "Super effective!" not in messages:
+                        messages.append("Super effective!")
                 elif i in opponent.type and index == 1:
                     type_modifier /= 2
-                    messages.append("Not very effective...")
+                    if "Not very effective..." not in messages:
+                        messages.append("Not very effective...")
 
         # Calculates the modifier
         modifier = critical * rand_modifier * type_modifier
@@ -394,6 +396,11 @@ class Pokemon(Sprite):
         messages.insert(1, f"Damage dealt: {int(damage)}")
         if opponent.hp - damage <= 0:
             messages.append(f"{opponent_name} fainted!")
+        if "Super effective!" in messages and (
+                "Not very effective..." in messages):
+            # Cancels the messages out if they're both in messages
+            messages.remove("Super effective!")
+            messages.remove("Not very effective...")
         return damage, messages
 
     def choose_move(self, target):
