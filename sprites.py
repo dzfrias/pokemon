@@ -77,7 +77,8 @@ class Button(Sprite):
 
     def collide(self, point):
         """Check if one of the two hitboxes are collided with"""
-        return self.rect.collidepoint(point) or self.touch_box.collidepoint(point)
+        return self.rect.collidepoint(point) or (
+                self.touch_box.collidepoint(point))
 
     def handle_float(self, collide):
         """Float if collided with"""
@@ -243,7 +244,7 @@ class Message(Sprite):
         return self.text != other
 
     def __repr__(self):
-        return f"{self.__class__.__name__}({self.text}, pos={self.rect.center})"
+        return f"{self.__class__.__name__}({self.text}, {self.rect.center})"
 
 
 class ErrorMessage(Message):
@@ -296,7 +297,8 @@ class Pokemon(Sprite):
         self.given_name = given_name
 
         # -Pygame Stuff-
-        self.surf = pygame.image.load(f"images/{self.name.lower()}.png").convert_alpha()
+        self.surf = pygame.image.load(
+                f"images/{self.name.lower()}.png").convert_alpha()
         self.surf = pygame.transform.scale(self.surf, [150, 150])
         self.rect = self.surf.get_rect()
         self.particles = pygame.sprite.Group()
@@ -369,7 +371,8 @@ class Pokemon(Sprite):
         # Code to calculate the effectiveness of the attack
 
         # Super effective
-        for index, effective in enumerate((move.super_effective, move.not_effective)):
+        for index, effective in enumerate(
+                (move.super_effective, move.not_effective)):
             for i in effective:
                 if i in opponent.type and index == 0:
                     type_modifier *= 2
