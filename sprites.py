@@ -106,11 +106,9 @@ class Button(Sprite):
         if not self.hit_cooldown:
             # Starts the cooldown
             self.hit_cooldown.reset()
-            try:
+            if self.func is not None:
                 # Calls the associated function if it is set
                 result = self.func(*self.args)
-            except TypeError:
-                result = None
             for button in self.groups()[-1]:
                 button.kill()
             return result
@@ -126,7 +124,8 @@ class ImageButton(Button):
             pos: tuple,
             groups: tuple,
             alpha: int,
-            return_
+            return_,
+            sound
             ):
         Sprite.__init__(self, *groups)
 
@@ -142,6 +141,7 @@ class ImageButton(Button):
         self.floating = False
         self.alpha = alpha
         self.enabled = True
+        self.sound = sound
 
         # -Button Stuff-
         self.return_val = return_
@@ -160,6 +160,7 @@ class ImageButton(Button):
     def activate(self):
         """Returns the value assigned"""
         if self.enabled:
+            self.sound.play()
             return self.return_val
         return None
 
@@ -290,8 +291,8 @@ class Pokemon(Sprite):
         self.defense = pokemon["Defense"]
         self.speed = pokemon["Speed"]
         if xp is None:
-            # Sets xp to the default if not specified otherwise
-            self.xp = pokemon["Experience"]
+            # xp will be None if it is a starter pokemon
+            self.xp = pokemon["Experience"] + 70
         else:
             self.xp = xp
         self.given_name = given_name

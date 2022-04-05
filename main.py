@@ -57,6 +57,9 @@ class Game:
         # -Sound-
         pygame.mixer.init()
         self.hit_sound = pygame.mixer.Sound("audio/hit_effect.wav")
+        self.button_sound = pygame.mixer.Sound("audio/button_pressed.wav")
+        self.capture_sound = pygame.mixer.Sound("audio/capture_sound.wav")
+        self.replace_sound = pygame.mixer.Sound("audio/throwing_ball.wav")
 
     def player_turn(self):
         """Creates the player UI when taking their turn"""
@@ -114,6 +117,7 @@ class Game:
         self.player_pokemon = next(self.belt_iter)
         self.player_pokemon.add(self.all_sprites, self.pokemon)
         self.player_pokemon.rect.center = (150, 500)
+        self.replace_sound.play()
 
     def battle(self, unformed_belt):
         """The battle screen between the player and the opponent"""
@@ -211,6 +215,7 @@ class Game:
                                     text_box.usable = True
                                     self.player_pokemon.xp += (
                                             self.cp_pokemon.xp // 4)
+                                    self.capture_sound.play()
 
             # -Turn Order-
             if (self.current_message is None or self.current_message.seen) and (
@@ -245,10 +250,10 @@ class Game:
                     self.log_pokemon(
                             self.player_pokemon.given_name, self.player_pokemon
                             )
-                    # Puts the replacement message at the end of the list,
-                    # so it can be seen by the message system
                     try:
                         next_pokemon = self.belt[self.belt.index(self.player_pokemon) + 1].given_name
+                        # Puts the replacement message at the end of the list,
+                        # so it can be seen by the message system
                         self.messages.append(f"{next_pokemon} has entered the field!")
                     except IndexError:
                         # The player loses because they have no more pokemon
@@ -297,6 +302,7 @@ class Game:
         self.log_pokemon(self.player_pokemon.given_name, self.player_pokemon)
         with open("pokemon.json", "w") as f:
             json.dump(self.pokedex, f, indent=4)
+        pygame.mixer.music.stop()
 
     def opening_screen(self, first_time):
         """The screen for when the player plays for the first time or open
@@ -314,7 +320,8 @@ class Game:
                         groups=(self.all_sprites, self.buttons),
                         pos=pos,
                         alpha=100,
-                        return_=pokemon
+                        return_=pokemon,
+                        sound=self.button_sound
                         )
             open_text = "Choose and name your starter!"
         else:
@@ -337,7 +344,8 @@ class Game:
                         groups=(self.all_sprites, self.buttons),
                         pos=pos,
                         alpha=100,
-                        return_=(name, pokemon)
+                        return_=(name, pokemon),
+                        sound=self.button_sound
                         )
                 # Centers the text a little more to the image
                 all_text.append(
