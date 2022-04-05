@@ -46,6 +46,22 @@
         "Speed": 43,
         "Experience": 63
     },
+    "Secret": {
+        "Type": [
+            "Fairy",
+            "Ground"
+        ],
+        "HP": 300,
+        "Moves": [
+            "Outrage",
+            "Rock Throw",
+            "Absorb"
+        ],
+        "Attack": 300000,
+        "Defense": 300000,
+        "Speed": 277,
+        "Experience": 100000
+    },
     "Jigglypuff": {
         "Type": [
             "Normal",

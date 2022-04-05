@@ -46,6 +46,7 @@ class Game:
         self.pokeball_image = pygame.transform.scale(self.pokeball_image, (350, 350))
         self.belt = []
         self.belt_iter = iter(self.belt)
+        self.lost = False
 
         with open("type_colors.json") as f:
             self.TYPE_COLORS = json.load(f)
@@ -93,7 +94,7 @@ class Game:
             self.current_message = sprites.Message(
                     "Name your pokemon!",
                     (500, 600),
-                    (self.all_sprites, self.text)) 
+                    (self.all_sprites, self.text))
         text_box.draw(self.screen)
 
     def log_pokemon(self, name, pokemon):
@@ -102,7 +103,12 @@ class Game:
 
     def replace_pokemon(self):
         self.player_pokemon.kill()
-        self.player_pokemon = next(self.belt_iter)
+        try:
+            self.player_pokemon = next(self.belt_iter)
+        except StopIteration:
+            # Losing goes here!
+            self.messages.append("You're out of pokemon! You lose!")
+            self.lost = True
         self.player_pokemon.add(self.all_sprites, self.pokemon)
         self.player_pokemon.rect.center = (150, 500)
 
@@ -124,6 +130,11 @@ class Game:
                 random.choice(list(sprites.POKEMON.keys())),
                 (self.all_sprites, self.pokemon)
                 )
+        if random.randint(1, 100) == 1:
+            self.cp_pokemon = sprites.Pokemon(
+                    "Secret",
+                    (self.all_sprites, self.pokemon)
+                    )
         # Puts both pokemon into set positions
         self.player_pokemon.rect.center = (150, 500)
         self.cp_pokemon.rect.center = (800, 375)
@@ -154,7 +165,7 @@ class Game:
                     if inp is not None and inp not in self.pokedex and inp:
                         text_box.usable = False
                         self.log_pokemon(inp, self.cp_pokemon)
-                        # Releases the suspended message 
+                        # Releases the suspended message
                         self.current_message.release()
 
                 if event.type == KEYDOWN:
@@ -179,6 +190,7 @@ class Game:
                                     # Gives prompt to name pokemon, as a
                                     # defeated pokemon is a captured one
                                     text_box.usable = True
+                                    self.player_pokemon += self.cp_pokemon.xp // 4
 
             # -Turn Order-
             if (self.current_message is None or self.current_message.seen) and not text_box.usable:
@@ -213,7 +225,7 @@ class Game:
             pressed = pygame.key.get_pressed()
             self.buttons.update()
             # Messages need the enter key to be pressed in order to be seen
-            self.text.update(pressed)
+            self.text.update(pressed, self.lost)
             self.pokemon.update()
             if text_box.usable:
                 text_box.update()

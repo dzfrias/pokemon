@@ -202,14 +202,22 @@ class Message(Sprite):
         # messages in a group are seen
         self.__class__.reuse = True
 
-    def update(self, pressed):
+    def update(self, pressed, lost):
         """Advance the bar and sense for when return is pressed"""
+        if lost and "entered the field" in self.text:
+            # Doesn't display the entered the field message if the player
+            # has already lost
+            self.kill()
+            self.seen = True
+            return
         # Gets the integer value for if the enter key is pressed
         enter = pressed[K_RETURN]
         if enter and not self.timer and self.text not in self.__class__.FROZEN:
             self.kill()
             # Marks as seen so the main loop can advance
             self.seen = True
+            if "You're out of pokemon! You lose!" in self.text:
+                raise Exception
         if self.timer > 0:
             self.timer -= 1
         if self.bar_rect.w < SCREEN_WIDTH:
@@ -238,6 +246,10 @@ class Message(Sprite):
 
     def __repr__(self):
         return f"{self.__class__.__name__}({self.text}, pos={self.rect.center})"
+
+
+class ErrorMessage(Message):
+    pass
 
 
 class Pokemon(Sprite):
