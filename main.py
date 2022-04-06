@@ -12,7 +12,7 @@ import json
 from os.path import getsize
 
 GOD_MODE = False
-WEAK_MODE = True
+WEAK_MODE = False
 
 
 class Game:
