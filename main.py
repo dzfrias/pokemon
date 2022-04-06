@@ -12,7 +12,7 @@ import json
 from os.path import getsize
 
 GOD_MODE = False
-WEAK_MODE = False
+WEAK_MODE = True
 
 
 class Game:
@@ -60,6 +60,7 @@ class Game:
         self.button_sound = pygame.mixer.Sound("audio/button_pressed.wav")
         self.capture_sound = pygame.mixer.Sound("audio/capture_sound.wav")
         self.replace_sound = pygame.mixer.Sound("audio/throwing_ball.wav")
+        self.lose_sound = pygame.mixer.Sound("audio/lose_music.wav")
 
     def player_turn(self):
         """Creates the player UI when taking their turn"""
@@ -257,10 +258,12 @@ class Game:
                             self.player_pokemon.given_name, self.player_pokemon
                             )
                     try:
-                        next_pokemon = self.belt[self.belt.index(self.player_pokemon) + 1].given_name
+                        next_pokemon = self.belt[self.belt.index(
+                            self.player_pokemon) + 1].given_name
                         # Puts the replacement message at the end of the list,
                         # so it can be seen by the message system
-                        self.messages.append(f"{next_pokemon} has entered the field!")
+                        self.messages.append(
+                                f"{next_pokemon} has entered the field!")
                     except IndexError:
                         # The player loses because they have no more pokemon
                         self.messages.append(
@@ -268,6 +271,7 @@ class Game:
                         self.lost = True
 
             if self.lost and self.current_message.text == "You're out of pokemon! You lose!" and self.current_message.seen:
+                self.lose_sound.play()
                 break
             pressed = pygame.key.get_pressed()
             self.buttons.update()
