@@ -1,8 +1,8 @@
 # pokemon
-School pokémon project made in Pygame. To play, run using python3.10 and have the latest version of Pygame installed. For the best experience, play with audio.
+School pokémon project made in pygame. To play, run using python3.10 and have the latest version of pygame installed. For the best experience, play with audio.
 
 ## Extra Features
-- Made completely in Pygame
+- Made completely in pygame
 - Animations for most things
 - Saving pokémon across saves
 - Gaining xp for winning

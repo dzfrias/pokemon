@@ -347,6 +347,11 @@ class Pokemon(Sprite):
         pygame.draw.rect(screen, "#af0303", rect)
         # Draws white border around health bar
         pygame.draw.rect(screen, "White", (*pos, self.bar_len, 25), 4)
+        level = SMALL_FONT.render(f"Lvl. {self.level()}", True, "Yellow")
+        # Gets the position for the level indicator
+        level_pos = (self.rect.centerx + 50,
+                     self.rect.centery - 40 - self.offset_y)
+        screen.blit(level, level_pos)
 
     def take_damage(self, amount, sound):
         """Subtracts from hp, creates a Slash particle effect, and starts
@@ -502,7 +507,7 @@ class InputBox:
                 return self.text
             elif event.key == pygame.K_BACKSPACE:
                 self.text = self.text[:-1]
-            elif len(self.text) != 15:
+            elif len(self.text) != 10:
                 if not self.typed:
                     self.text = ""
                 self.text += event.unicode
