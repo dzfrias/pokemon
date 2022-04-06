@@ -239,5 +239,21 @@
         "Defense": 40,
         "Speed": 84,
         "Experience": 61
+    },
+    "Pigg": {
+        "Type": [
+            "Psychic",
+            "Steel"
+        ],
+        "HP": 10000000000000000,
+        "Moves": [
+            "Flash Cannon",
+            "Rock Throw",
+            "Twineedle"
+        ],
+        "Attack": 30000000000000000000000000000000,
+        "Defense": 30000000000000000000000000000000,
+        "Speed": 278,
+        "Experience": 10000000000000000
     }
 }

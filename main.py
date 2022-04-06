@@ -94,6 +94,17 @@ class Game:
             self.p_turn = False
         self.button_background = sprites.RisingBox(600)
 
+    @staticmethod
+    def choose_cp_pokemon():
+        all_pokemon = list(sprites.POKEMON.keys())
+        all_pokemon.remove("Secret")
+        all_pokemon.remove("Pigg")
+        if random.randint(1, 100) == 1:
+            return "Pigg"
+        if random.randint(1, 100) == 1:
+            return "Secret"
+        return random.choice(all_pokemon)
+
     def draw_capture(self, text_box):
         """Draws the UI for when the player beats the opponent"""
         pokeball_pos = (SCREEN_WIDTH / 2 - 175, SCREEN_HEIGHT / 2 - 175)
@@ -134,14 +145,9 @@ class Game:
             self.player_pokemon.xp = 100000000000000
         # Randomly chooses a pokemon for the computer
         self.cp_pokemon = sprites.Pokemon(
-                random.choice(list(sprites.POKEMON.keys())),
+                self.choose_cp_pokemon(),
                 (self.all_sprites, self.pokemon)
                 )
-        if random.randint(1, 100) == 1:
-            self.cp_pokemon = sprites.Pokemon(
-                    "Secret",
-                    (self.all_sprites, self.pokemon)
-                    )
         # Puts both pokemon into set positions
         self.player_pokemon.rect.center = (150, 500)
         self.cp_pokemon.rect.center = (800, 375)
