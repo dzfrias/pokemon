@@ -10,10 +10,7 @@ class Cooldown:
     auto_reset: bool = field(kw_only=True, compare=False, default=False)
     func: Callable = field(kw_only=True, compare=False, default=None)
     args: tuple = field(kw_only=True, compare=False, default=())
-
-    def __post_init__(self):
-        """Called on instance initialization"""
-        self.value = 0
+    value = 0
 
     def reset(self, reset_val=None, *, call_func=True):
         """Sets the value to the reset value and calls the optional function"""

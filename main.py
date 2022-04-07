@@ -24,6 +24,8 @@ class Game:
         self.screen = pygame.display.set_mode([SCREEN_WIDTH, SCREEN_HEIGHT])
         self.clock = pygame.time.Clock()
         pygame.display.set_caption("Pokémon Duels")
+        # Sets icon to pokeball
+        pygame.display.set_icon(pygame.image.load("images/pokeball.png"))
 
         # -Groups-
         self.all_sprites = pygame.sprite.Group()

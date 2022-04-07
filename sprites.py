@@ -507,7 +507,7 @@ class InputBox:
                 return self.text
             elif event.key == pygame.K_BACKSPACE:
                 self.text = self.text[:-1]
-            elif len(self.text) != 10:
+            elif len(self.text) != 11:
                 if not self.typed:
                     self.text = ""
                 self.text += event.unicode
