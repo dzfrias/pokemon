@@ -6,7 +6,7 @@ To start, click the buttons for your starter. Every message (example: "You win!"
 
 ## Extra Features
 - Made completely in pygame
-- Animations for most things
+- Animations for almost every event in the game
 - Saving pokémon across saves
 - Gaining xp for winning
 - Naming pokémon
@@ -17,6 +17,8 @@ To start, click the buttons for your starter. Every message (example: "You win!"
 - A secret pokémon
 - Sound effects
 - Music
+- Icon
+- Stronger starter pokémon
 
 ## Citations
 - [Button Sound Effect](https://www.youtube.com/watch?v=5UHmxWsPNzg)
@@ -25,3 +27,5 @@ To start, click the buttons for your starter. Every message (example: "You win!"
 - [Background Battle Music](https://www.youtube.com/watch?v=91tODLXipK4)
 - [Losing Sound Effect](https://www.youtube.com/watch?v=bceGNIg-rqI)
 - [Damage Sound Effect](https://www.youtube.com/watch?v=ON7KqgdJYK0)
+- [Background Image](https://www.deviantart.com/phoenixoflight92/art/Pokemon-X-and-Y-battle-background-11-490619697)
+- [Pokeball Image](https://en.m.wikipedia.org/wiki/File:Pok%C3%A9_Ball_icon.svg)
